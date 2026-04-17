@@ -1,11 +1,12 @@
 // Service Worker for In-N-Out Order Helper
 // Caches all app files so the app works offline after first visit
 
-const CACHE_NAME = 'innout-order-v1';
+const CACHE_NAME = 'innout-order-v2';
 const FILES_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './html2canvas.min.js',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
