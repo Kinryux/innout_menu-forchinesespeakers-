@@ -31,6 +31,15 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+  /* Prevent double-tap-to-zoom on buttons, checkboxes, and interactive areas
+     (pinch-to-zoom still works for accessibility) */
+  button, label, input, .mod-chip, .cat-btn, .qty-btn, .tab,
+  .cart-bar-btn, .add-btn, .modal-close, .mod-toggle,
+  .show-mode-save, .show-mode-close, .remove-btn,
+  .item-card, .item-actions, .category-nav {
+    touch-action: manipulation;
+  }
+
   html, body {
     background: var(--paper);
     color: var(--ink);
