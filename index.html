@@ -43,29 +43,29 @@
   .header {
     background: var(--innout-red);
     color: #fff;
-    padding: 20px 16px 22px;
+    padding: 16px 16px 20px;
     text-align: center;
     border-bottom: 5px solid var(--ink);
   }
 
+  .header-brand {
+    font-family: 'Fraunces', 'Bebas Neue', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--innout-yellow);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    opacity: 0.95;
+  }
+
   .header h1 {
     font-family: 'Noto Serif SC', serif;
-    font-size: 34px;
+    font-size: 38px;
     font-weight: 900;
     line-height: 1.1;
     text-shadow: 2px 2px 0 var(--ink);
-  }
-
-  .header .subtitle {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    margin-top: 8px;
-    background: var(--innout-yellow);
-    color: var(--ink);
-    display: inline-block;
-    padding: 4px 16px;
-    letter-spacing: 3px;
-    border: 2px solid var(--ink);
+    letter-spacing: 2px;
   }
 
   .category-nav {
@@ -944,8 +944,8 @@
 <body>
 
 <header class="header">
-  <h1>妈妈的 In-N-Out 点餐单</h1>
-  <div class="subtitle">IN-N-OUT BURGER</div>
+  <div class="header-brand">In-N-Out</div>
+  <h1>妈妈的点餐单</h1>
 </header>
 
 <nav class="category-nav" id="tabs"></nav>
