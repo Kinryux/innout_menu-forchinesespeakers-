@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>妈妈的 In-N-Out 点餐</title>
+
+<!-- PWA: manifest, icon, theme colors, standalone mode -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ed1c24">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="妈妈点餐">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,wght@1,500;1,600&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --innout-red: #ed1c24;
+    --innout-red-deep: #b8141a;
+    --innout-yellow: #ffd21f;
+    --innout-cream: #fff8ec;
+    --ink: #1a1a1a;
+    --paper: #fdfaf2;
+    --muted: #5a4e3d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    font-size: 18px;
+  }
+
+  .header {
+    background: var(--innout-red);
+    color: #fff;
+    padding: 20px 16px 22px;
+    text-align: center;
+    border-bottom: 5px solid var(--ink);
+  }
+
+  .header h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 34px;
+    font-weight: 900;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .header .subtitle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    margin-top: 8px;
+    background: var(--innout-yellow);
+    color: var(--ink);
+    display: inline-block;
+    padding: 4px 16px;
+    letter-spacing: 3px;
+    border: 2px solid var(--ink);
+  }
+
+  .category-nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 14px;
+    background: var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 4px solid var(--innout-yellow);
+  }
+
+  .cat-btn {
+    padding: 14px 8px;
+    background: #fff;
+    color: var(--ink);
+    border: 3px solid var(--innout-yellow);
+    border-radius: 6px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 22px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    line-height: 1.1;
+  }
+
+  .cat-btn small {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--innout-red);
+    letter-spacing: 2px;
+    margin-top: 4px;
+    font-weight: normal;
+  }
+
+  .cat-btn.active {
+    background: var(--innout-red);
+    color: #fff;
+    border-color: #fff;
+  }
+  .cat-btn.active small { color: var(--innout-yellow); }
+
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 18px 14px 180px;
+  }
+
+  .instruction-box {
+    background: var(--innout-yellow);
+    border: 3px solid var(--ink);
+    padding: 16px;
+    margin-bottom: 20px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.5;
+    border-radius: 6px;
+  }
+
+  .instruction-box .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 6px 0;
+  }
+
+  .step-num {
+    background: var(--innout-red);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-title {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--innout-red-deep);
+    border-bottom: 4px solid var(--ink);
+    padding-bottom: 8px;
+    margin: 10px 0 18px;
+  }
+
+  .item-card {
+    background: #fff;
+    border: 3px solid var(--ink);
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 18px;
+    box-shadow: 5px 5px 0 var(--ink);
+  }
+
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .item-zh {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 28px;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+
+  .item-en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: var(--innout-red-deep);
+    margin-top: 4px;
+  }
+
+  .item-desc {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+
+  .item-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    background: var(--innout-yellow);
+    padding: 4px 14px;
+    border: 3px solid var(--ink);
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  .mod-toggle {
+    width: 100%;
+    background: var(--innout-cream);
+    border: 2px solid var(--innout-red);
+    padding: 12px;
+    border-radius: 6px;
+    margin-top: 10px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--innout-red-deep);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .mod-toggle .arrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    transition: transform 0.2s;
+  }
+
+  .mod-toggle.open .arrow {
+    transform: rotate(180deg);
+  }
+
+  .mod-section {
+    display: none;
+    background: var(--innout-cream);
+    border: 2px dashed var(--innout-red);
+    padding: 12px 14px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+
+  .mod-section.open {
+    display: block;
+  }
+
+  .mod-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mod-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 17px;
+    user-select: none;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+  }
+
+  .mod-chip input {
+    accent-color: var(--innout-red);
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .mod-chip:has(input:checked) {
+    background: var(--innout-red);
+    color: #fff;
+  }
+
+  .mod-chip .mod-en {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    opacity: 0.8;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    font-weight: normal;
+  }
+
+  .item-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    align-items: stretch;
+  }
+
+  .qty-control {
+    display: flex;
+    align-items: center;
+    border: 3px solid var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .qty-btn {
+    width: 50px;
+    height: 54px;
+    border: none;
+    background: var(--innout-cream);
+    font-weight: 900;
+    font-size: 28px;
+    cursor: pointer;
+    font-family: 'Bebas Neue', sans-serif;
+  }
+  .qty-btn:active { background: var(--innout-yellow); }
+
+  .qty-val {
+    width: 50px;
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    border: none;
+    background: #fff;
+    outline: none;
+    height: 54px;
+  }
+
+  .add-btn {
+    flex: 1;
+    background: var(--innout-red);
+    color: #fff;
+    border: 3px solid var(--ink);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    line-height: 1.2;
+  }
+
+  .add-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .cart-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--ink);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 5px solid var(--innout-yellow);
+    z-index: 100;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+    gap: 12px;
+  }
+
+  .cart-bar-info { display: flex; flex-direction: column; }
+
+  .cart-bar-count {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 18px;
+  }
+
+  .cart-bar-total {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--innout-yellow);
+  }
+
+  .cart-bar-btn {
+    background: var(--innout-red);
+    color: #fff;
+    border: 3px solid var(--innout-yellow);
+    padding: 14px 20px;
+    border-radius: 6px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 19px;
+    line-height: 1.15;
+  }
+
+  .cart-bar-btn small {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-weight: normal;
+    color: var(--innout-yellow);
+    margin-top: 2px;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    width: 100%;
+    max-width: 700px;
+    max-height: 92vh;
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 4px solid var(--ink);
+    border-bottom: none;
+  }
+
+  .modal-head {
+    background: var(--innout-red);
+    color: #fff;
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 4px solid var(--ink);
+  }
+
+  .modal-head h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 26px;
+    font-weight: 900;
+  }
+
+  .modal-head h2 small {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    opacity: 0.95;
+    font-weight: normal;
+    margin-top: 2px;
+  }
+
+  .modal-close {
+    background: var(--innout-yellow);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 18px;
+    flex: 1;
+  }
+
+  .cart-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--muted);
+  }
+
+  .cart-empty .big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    color: var(--innout-red);
+    letter-spacing: 3px;
+  }
+
+  .cart-empty p {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  .cart-item {
+    border: 3px solid var(--ink);
+    padding: 14px;
+    margin-bottom: 12px;
+    background: #fff;
+    box-shadow: 4px 4px 0 var(--ink);
+    border-radius: 6px;
+  }
+
+  .cart-item-name {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .cart-item-en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 17px;
+    color: var(--innout-red-deep);
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  .cart-item-mods {
+    font-size: 16px;
+    color: var(--ink);
+    margin-top: 8px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    border-left: 4px solid var(--innout-yellow);
+    background: var(--innout-cream);
+    font-weight: 600;
+  }
+
+  .cart-item-ctrl {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+  }
+
+  .cart-item-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    color: var(--innout-red-deep);
+  }
+
+  .remove-btn {
+    background: #fff;
+    border: 2px solid var(--innout-red);
+    color: var(--innout-red);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+  }
+
+  .cart-totals {
+    border-top: 4px dashed var(--ink);
+    margin-top: 16px;
+    padding-top: 14px;
+  }
+
+  .cart-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .cart-total-row.big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 3px solid var(--ink);
+  }
+
+  .modal-footer {
+    padding: 14px;
+    background: var(--innout-cream);
+    border-top: 3px solid var(--ink);
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-footer button {
+    flex: 1;
+    padding: 16px 10px;
+    border: 3px solid var(--ink);
+    border-radius: 6px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1.2;
+  }
+
+  .btn-clear { background: #fff; color: var(--ink); }
+  .btn-show { background: var(--innout-yellow); color: var(--ink); }
+  .btn-show:active { background: var(--innout-red); color: #fff; }
+
+  .show-mode {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 300;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .show-mode.active { display: flex; }
+
+  .show-mode-head {
+    background: var(--innout-red);
+    color: #fff;
+    padding: 6px 14px;
+    text-align: center;
+    border-bottom: 3px solid var(--ink);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .show-mode-head h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .show-mode-head p {
+    display: none;
+  }
+
+  .show-body-wrap {
+    padding: 4px 8px;
+    flex: 1;
+  }
+
+  .show-line {
+    padding: 5px 4px;
+    border-bottom: 1px dashed #ccc;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .show-line:last-child {
+    border-bottom: none;
+  }
+
+  .show-line .line-num-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: var(--innout-red);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: normal;
+    flex-shrink: 0;
+    min-width: 26px;
+    text-align: center;
+    margin-top: 3px;
+  }
+
+  .show-line-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .show-line .en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+  }
+
+  .show-line .mods-en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: var(--innout-red-deep);
+    margin-top: 1px;
+    line-height: 1.15;
+    letter-spacing: 0.5px;
+  }
+
+  .show-line .zh {
+    display: none;
+  }
+
+  .togo-banner {
+    background: var(--innout-yellow);
+    border: 2px solid var(--ink);
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin: 2px 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 2px 2px 0 var(--innout-red);
+  }
+
+  .togo-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .togo-text { flex: 1; }
+
+  .togo-en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 19px;
+    letter-spacing: 2px;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .togo-sub {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 11px;
+    color: var(--innout-red-deep);
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .thank-you {
+    background: var(--innout-cream);
+    border: 1.5px dashed var(--innout-red);
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  .thank-you-hearts {
+    font-size: 14px;
+    letter-spacing: 5px;
+    margin-bottom: 2px;
+  }
+
+  .thank-you-en {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .thank-you-zh {
+    display: none;
+  }
+
+  .thank-you-sub {
+    display: none;
+  }
+
+  .show-total {
+    background: var(--innout-yellow);
+    border: 4px solid var(--ink);
+    margin: 18px 12px;
+    padding: 16px;
+    text-align: center;
+    border-radius: 8px;
+  }
+
+  .show-total .total-en {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 1px;
+  }
+
+  .show-total .total-zh {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .show-mode-close {
+    position: sticky;
+    bottom: 0;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 8px;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 14px;
+    cursor: pointer;
+    border-top: 2px solid var(--innout-yellow);
+  }
+
+  .secret-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--innout-yellow);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    padding: 3px 10px;
+    letter-spacing: 1px;
+    margin-left: 8px;
+    vertical-align: middle;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 110px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: #fff;
+    padding: 14px 24px;
+    border-radius: 8px;
+    border: 3px solid var(--innout-yellow);
+    z-index: 400;
+    opacity: 0;
+    transition: all 0.3s;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 900;
+    font-size: 18px;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+</style>
+</head>
+<body>
+
+<header class="header">
+  <h1>妈妈的 In-N-Out 点餐单</h1>
+  <div class="subtitle">IN-N-OUT BURGER</div>
+</header>
+
+<nav class="category-nav" id="tabs"></nav>
+
+<main>
+  <div class="instruction-box">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>选菜单,按红色 <span style="color:var(--innout-red-deep);">"+ 加入购物车"</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>按下面 <span style="color:var(--innout-red-deep);">"查看订单"</span> 确认</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>按 <span style="color:var(--innout-red-deep);">"给店员看"</span>,把手机给店员</div>
+    </div>
+  </div>
+
+  <div id="panels"></div>
+</main>
+
+<div class="cart-bar">
+  <div class="cart-bar-info">
+    <span class="cart-bar-count" id="cartCount">购物车: 0 件</span>
+    <span class="cart-bar-total" id="cartTotal">$0.00</span>
+  </div>
+  <button class="cart-bar-btn" onclick="openCart()">
+    查看订单
+    <small>VIEW ORDER</small>
+  </button>
+</div>
+
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>我的订单<small>MY ORDER</small></h2>
+      <button class="modal-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="modal-body" id="cartBody"></div>
+    <div class="modal-footer">
+      <button class="btn-clear" onclick="clearCart()">清空</button>
+      <button class="btn-show" onclick="showOrderSheet()">给店员看 ▶</button>
+    </div>
+  </div>
+</div>
+
+<div class="show-mode" id="showMode">
+  <div class="show-mode-head">
+    <h1>MY ORDER, PLEASE</h1>
+    <p>请给店员看 · Show to cashier</p>
+  </div>
+  <div class="show-body-wrap">
+    <div id="showBody"></div>
+  </div>
+  <button class="show-mode-close" onclick="hideShowMode()">← 返回 BACK</button>
+</div>
+
+<div class="toast" id="toast">✓ 已加入</div>
+
+<script>
+  const menu = {
+    burgers: {
+      zh: "汉堡", en: "BURGERS",
+      items: [
+        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 5.85, mods: "burger" },
+        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.40, mods: "burger" },
+        { id: "hamburger", zh: "汉堡包 (无芝士)", en: "Hamburger", desc: "一片肉饼 + 生菜 + 番茄 + 洋葱 + 酱", price: 3.85, mods: "burger" },
+        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 7.85, mods: "burger" },
+        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 9.85, mods: "burger" },
+        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 5.85, mods: "burger" },
+        { id: "grilled", zh: "素食芝士堡 (无肉)", en: "Grilled Cheese", desc: "只有芝士和蔬菜,没有肉", secret: true, price: 3.85, mods: "burger" }
+      ]
+    },
+    sides: {
+      zh: "薯条 / 套餐", en: "FRIES / COMBO",
+      items: [
+        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.30, mods: "fries" },
+        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.50, mods: "none" },
+        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.40, mods: "none" },
+        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 9.75, mods: "burger" },
+        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 8.25, mods: "burger" },
+        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 7.75, mods: "burger" }
+      ]
+    },
+    drinks: {
+      zh: "饮料", en: "DRINKS",
+      items: [
+        { id: "coke", zh: "可乐 (中杯)", en: "Medium Coca-Cola", price: 2.25, mods: "none" },
+        { id: "diet", zh: "健怡可乐", en: "Diet Coke", price: 2.25, mods: "none" },
+        { id: "sprite", zh: "雪碧", en: "Sprite", price: 2.25, mods: "none" },
+        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: 2.25, mods: "none" },
+        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: 2.25, mods: "none" },
+        { id: "lemonade", zh: "柠檬水", en: "Lemonade", price: 2.25, mods: "none" },
+        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: 2.25, mods: "none" },
+        { id: "milk", zh: "牛奶", en: "Milk", price: 1.30, mods: "none" },
+        { id: "coffee", zh: "咖啡", en: "Coffee", price: 1.80, mods: "none" },
+        { id: "cocoa", zh: "热可可", en: "Hot Cocoa", price: 2.30, mods: "none" },
+        { id: "water", zh: "水 (免费)", en: "Water Cup — free", price: 0, mods: "none" }
+      ]
+    },
+    shakes: {
+      zh: "奶昔", en: "SHAKES",
+      items: [
+        { id: "van", zh: "香草奶昔", en: "Vanilla Shake", price: 3.25, mods: "none" },
+        { id: "choc", zh: "巧克力奶昔", en: "Chocolate Shake", price: 3.25, mods: "none" },
+        { id: "straw", zh: "草莓奶昔", en: "Strawberry Shake", price: 3.25, mods: "none" },
+        { id: "neo", zh: "三色奶昔 (三种口味)", en: "Neapolitan Shake — all three flavors", secret: true, price: 3.25, mods: "none" },
+        { id: "blackwhite", zh: "黑白奶昔", en: "Black & White Shake — chocolate and vanilla", secret: true, price: 3.25, mods: "none" }
+      ]
+    }
+  };
+
+  const modSets = {
+    burger: {
+      zh: "想改一下吗? (可不选)",
+      options: [
+        { id: "animal", zh: "野兽风 (加料更好吃)", en: "Animal Style" },
+        { id: "no_onion", zh: "不要洋葱", en: "No Onions" },
+        { id: "grilled_onion", zh: "要炒洋葱", en: "Grilled Onions" },
+        { id: "no_tomato", zh: "不要番茄", en: "No Tomato" },
+        { id: "no_sauce", zh: "不要酱", en: "No Spread" },
+        { id: "extra_sauce", zh: "多加酱", en: "Extra Spread" },
+        { id: "protein_mod", zh: "生菜包 (不要面包)", en: "Protein Style — lettuce wrap" },
+        { id: "chopped_chilis", zh: "加辣椒", en: "Add Chopped Chilis" }
+      ]
+    },
+    fries: {
+      zh: "想改一下吗? (可不选)",
+      options: [
+        { id: "well_fries", zh: "多煎一下 (更脆)", en: "Well Done" },
+        { id: "light", zh: "少煎一下 (软一点)", en: "Light Well" },
+        { id: "animal_style_fries", zh: "加野兽料", en: "Animal Style" },
+        { id: "cheese_only", zh: "加芝士", en: "Add Cheese" }
+      ]
+    }
+  };
+
+  const state = { currentTab: "burgers", cart: [] };
+
+  const tabsEl = document.getElementById("tabs");
+  const panelsEl = document.getElementById("panels");
+
+  Object.entries(menu).forEach(([key, cat], i) => {
+    const btn = document.createElement("button");
+    btn.className = "cat-btn" + (i === 0 ? " active" : "");
+    btn.dataset.tab = key;
+    btn.innerHTML = `${cat.zh}<small>${cat.en}</small>`;
+    btn.onclick = () => selectTab(key);
+    tabsEl.appendChild(btn);
+
+    const panel = document.createElement("div");
+    panel.className = "panel" + (i === 0 ? " active" : "");
+    panel.id = "panel-" + key;
+
+    const title = document.createElement("div");
+    title.className = "section-title";
+    title.innerHTML = `${cat.zh} · ${cat.en}`;
+    panel.appendChild(title);
+
+    cat.items.forEach(item => panel.appendChild(renderItem(item)));
+    panelsEl.appendChild(panel);
+  });
+
+  function renderItem(item) {
+    const card = document.createElement("div");
+    card.className = "item-card";
+    card.dataset.itemId = item.id;
+
+    const secretBadge = item.secret ? '<span class="secret-badge">隐藏菜单</span>' : '';
+    const hasMods = item.mods !== "none";
+
+    card.innerHTML = `
+      <div class="item-head">
+        <div style="flex:1;">
+          <div class="item-zh">${item.zh}${secretBadge}</div>
+          <div class="item-en">${item.en}</div>
+        </div>
+        <div class="item-price">$${item.price.toFixed(2)}</div>
+      </div>
+      ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
+      ${hasMods ? renderModToggle(item) : ''}
+      <div class="item-actions">
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('${item.id}', -1)">−</button>
+          <input class="qty-val" id="qty-${item.id}" type="text" value="1" readonly>
+          <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
+        </div>
+        <button class="add-btn" onclick="addToCart('${item.id}')">+ 加入购物车</button>
+      </div>
+    `;
+    return card;
+  }
+
+  function renderModToggle(item) {
+    const mods = modSets[item.mods];
+    if (!mods) return '';
+    const opts = mods.options.map(m =>
+      `<label class="mod-chip">
+        <input type="checkbox" data-item="${item.id}" data-mod="${m.id}">
+        <span>${m.zh}<span class="mod-en">${m.en}</span></span>
+      </label>`
+    ).join("");
+    return `
+      <button class="mod-toggle" onclick="toggleMods(this)">
+        <span>⚙️ ${mods.zh}</span>
+        <span class="arrow">▼</span>
+      </button>
+      <div class="mod-section">
+        <div class="mod-list">${opts}</div>
+      </div>
+    `;
+  }
+
+  function toggleMods(btn) {
+    btn.classList.toggle("open");
+    btn.nextElementSibling.classList.toggle("open");
+  }
+
+  function selectTab(key) {
+    state.currentTab = key;
+    document.querySelectorAll(".cat-btn").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
+    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + key));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function changeQty(itemId, delta) {
+    const input = document.getElementById("qty-" + itemId);
+    let v = parseInt(input.value) + delta;
+    if (v < 1) v = 1;
+    if (v > 20) v = 20;
+    input.value = v;
+  }
+
+  function findItem(id) {
+    for (const cat of Object.values(menu)) {
+      const found = cat.items.find(i => i.id === id);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function addToCart(itemId) {
+    const item = findItem(itemId);
+    if (!item) return;
+    const qty = parseInt(document.getElementById("qty-" + itemId).value) || 1;
+
+    const modChecks = document.querySelectorAll(`input[data-item="${itemId}"]:checked`);
+    const selectedMods = [];
+    modChecks.forEach(cb => {
+      const modSet = modSets[item.mods];
+      if (modSet) {
+        const mod = modSet.options.find(o => o.id === cb.dataset.mod);
+        if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
+      }
+    });
+
+    state.cart.push({
+      uid: Date.now() + Math.random(),
+      id: item.id,
+      zh: item.zh,
+      en: item.en,
+      qty,
+      price: item.price,
+      mods: selectedMods
+    });
+
+    document.getElementById("qty-" + itemId).value = 1;
+    modChecks.forEach(cb => cb.checked = false);
+    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (card) {
+      const toggle = card.querySelector(".mod-toggle");
+      const section = card.querySelector(".mod-section");
+      if (toggle) toggle.classList.remove("open");
+      if (section) section.classList.remove("open");
+    }
+
+    updateCartBar();
+    showToast(`✓ ${item.zh} 已加入`);
+  }
+
+  function updateCartBar() {
+    const count = state.cart.reduce((s, i) => s + i.qty, 0);
+    const total = state.cart.reduce((s, i) => s + i.qty * i.price, 0);
+    document.getElementById("cartCount").textContent = `购物车: ${count} 件`;
+    document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
+  }
+
+  function openCart() {
+    renderCartBody();
+    document.getElementById("cartModal").classList.add("active");
+  }
+
+  function closeCart() {
+    document.getElementById("cartModal").classList.remove("active");
+  }
+
+  function renderCartBody() {
+    const body = document.getElementById("cartBody");
+    if (state.cart.length === 0) {
+      body.innerHTML = `<div class="cart-empty">
+        <div class="big">EMPTY</div>
+        <p>购物车是空的</p>
+        <p style="font-size:15px; margin-top:4px;">请先选择菜单</p>
+      </div>`;
+      return;
+    }
+
+    const subtotal = state.cart.reduce((s, i) => s + i.qty * i.price, 0);
+    const tax = subtotal * 0.0975;
+    const total = subtotal + tax;
+
+    let html = "";
+    state.cart.forEach(ci => {
+      const modsHtml = ci.mods.length
+        ? `<div class="cart-item-mods">${ci.mods.map(m => `• ${m.zh}`).join("<br>")}</div>`
+        : "";
+      html += `<div class="cart-item">
+        <div class="cart-item-name">${ci.zh} × ${ci.qty}</div>
+        <div class="cart-item-en">${ci.en}</div>
+        ${modsHtml}
+        <div class="cart-item-ctrl">
+          <div class="cart-item-price">$${(ci.qty * ci.price).toFixed(2)}</div>
+          <button class="remove-btn" onclick="removeItem('${ci.uid}')">删除</button>
+        </div>
+      </div>`;
+    });
+
+    html += `<div class="cart-totals">
+      <div class="cart-total-row"><span>小计</span><span>$${subtotal.toFixed(2)}</span></div>
+      <div class="cart-total-row"><span>税 (约9.75%)</span><span>$${tax.toFixed(2)}</span></div>
+      <div class="cart-total-row big"><span>总计</span><span>$${total.toFixed(2)}</span></div>
+    </div>`;
+
+    body.innerHTML = html;
+  }
+
+  function removeItem(uid) {
+    state.cart = state.cart.filter(i => String(i.uid) !== String(uid));
+    updateCartBar();
+    renderCartBody();
+  }
+
+  function clearCart() {
+    if (state.cart.length === 0) return;
+    if (!confirm("确定要清空吗?")) return;
+    state.cart = [];
+    updateCartBar();
+    renderCartBody();
+  }
+
+  function showOrderSheet() {
+    if (state.cart.length === 0) {
+      alert("购物车是空的");
+      return;
+    }
+    const body = document.getElementById("showBody");
+    let html = `
+      <div class="togo-banner">
+        <div class="togo-icon">🥡</div>
+        <div class="togo-text">
+          <div class="togo-en">TO-GO, PLEASE</div>
+          <div class="togo-sub">Not eating in vehicle · 不在车上吃</div>
+        </div>
+      </div>
+    `;
+    state.cart.forEach((ci, idx) => {
+      const modsEn = ci.mods.length
+        ? `<div class="mods-en">▸ ${ci.mods.map(m => m.en).join("<br>▸ ")}</div>`
+        : "";
+      html += `<div class="show-line">
+        <div class="line-num-label">${idx + 1}</div>
+        <div class="show-line-content">
+          <div class="en">${ci.qty} × ${ci.en}</div>
+          ${modsEn}
+        </div>
+      </div>`;
+    });
+
+    html += `
+      <div class="thank-you">
+        <div class="thank-you-hearts">🌟 💛 🌟</div>
+        <div class="thank-you-en">Thank you so much for your patience and kindness!</div>
+        <div class="thank-you-zh">非常感谢您的耐心和帮助!</div>
+        <div class="thank-you-sub">Have a wonderful day 祝您愉快</div>
+      </div>
+    `;
+
+    body.innerHTML = html;
+    closeCart();
+    document.getElementById("showMode").classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function hideShowMode() {
+    document.getElementById("showMode").classList.remove("active");
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._timeout);
+    t._timeout = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  document.getElementById("cartModal").addEventListener("click", e => {
+    if (e.target.id === "cartModal") closeCart();
+  });
+
+  updateCartBar();
+
+  // Register service worker for offline use (PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.log('SW registration failed:', err));
+    });
+  }
+</script>
+</body>
+</html>
