@@ -297,6 +297,49 @@
     color: #fff;
   }
 
+  .choice-group { margin-top: 10px; }
+  .mod-section .choice-group:first-child { margin-top: 0; }
+  .mod-section .choice-group + .mod-list,
+  .mod-section .choice-group + .choice-group { margin-top: 12px; }
+
+  .choice-label {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--innout-red-deep);
+    margin-bottom: 6px;
+  }
+
+  .choice-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .choice-chip {
+    position: relative;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 17px;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  /* Radio circle hidden; the red highlight shows the selection */
+  .choice-chip input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  .choice-chip:has(input:focus-visible) {
+    outline: 3px solid var(--innout-yellow);
+    outline-offset: 2px;
+  }
+
   .mod-chip .mod-en {
     display: block;
     font-family: 'Bebas Neue', sans-serif;
@@ -584,6 +627,14 @@
     padding: 6px 0;
     font-size: 18px;
     font-weight: 700;
+  }
+
+  .price-note {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 600;
   }
 
   .cart-total-row.big {
@@ -1035,40 +1086,46 @@
 <script src="html2canvas.min.js"></script>
 
 <script>
+  // Prices: approximate 2026 California prices (In-N-Out doesn't publish them).
+  // Check the menu board at Gale & 7th (Hacienda Heights) and adjust here.
+  const PRICES_UPDATED = "2026年11月";
+  // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County)
+  const TAX_RATE = 0.0975;
+
   const menu = {
     burgers: {
       zh: "汉堡", en: "BURGERS",
       items: [
-        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 5.85, mods: "burger" },
-        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.40, mods: "burger" },
+        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 6.25, mods: "burger" },
+        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.35, mods: "burger" },
         { id: "hamburger", zh: "汉堡包 (无芝士)", en: "Hamburger", desc: "一片肉饼 + 生菜 + 番茄 + 洋葱 + 酱", price: 3.85, mods: "burger" },
-        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 7.85, mods: "burger" },
-        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 9.85, mods: "burger" },
-        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 5.85, mods: "burger" },
+        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 8.25, mods: "burger" },
+        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 10.25, mods: "burger" },
+        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 6.25, mods: "burger" },
         { id: "grilled", zh: "素食芝士堡 (无肉)", en: "Grilled Cheese", desc: "只有芝士和蔬菜,没有肉", secret: true, price: 3.85, mods: "burger" }
       ]
     },
     sides: {
       zh: "薯条 / 套餐", en: "FRIES / COMBO",
       items: [
-        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.30, mods: "fries" },
-        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.50, mods: "none" },
-        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.40, mods: "none" },
-        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 9.75, mods: "burger" },
-        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 8.25, mods: "burger" },
-        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 7.75, mods: "burger" }
+        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.65, mods: "fries" },
+        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.85, mods: "none" },
+        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.75, mods: "none" },
+        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 10.65, mods: "burger" },
+        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 8.80, mods: "burger" },
+        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 8.30, mods: "burger" }
       ]
     },
     drinks: {
       zh: "饮料", en: "DRINKS",
       items: [
-        { id: "coke", zh: "可乐 (中杯)", en: "Medium Coca-Cola", price: 2.25, mods: "none" },
-        { id: "diet", zh: "健怡可乐", en: "Diet Coke", price: 2.25, mods: "none" },
-        { id: "sprite", zh: "雪碧", en: "Sprite", price: 2.25, mods: "none" },
-        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: 2.25, mods: "none" },
-        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: 2.25, mods: "none" },
-        { id: "lemonade", zh: "柠檬水", en: "Lemonade", price: 2.25, mods: "none" },
-        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: 2.25, mods: "none" },
+        { id: "coke", zh: "可乐 (中杯)", en: "Medium Coca-Cola", price: 2.45, mods: "none" },
+        { id: "diet", zh: "健怡可乐", en: "Diet Coke", price: 2.45, mods: "none" },
+        { id: "sprite", zh: "雪碧", en: "Sprite", price: 2.45, mods: "none" },
+        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: 2.45, mods: "none" },
+        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: 2.45, mods: "none" },
+        { id: "lemonade", zh: "柠檬水", en: "Lemonade", price: 2.45, mods: "none" },
+        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: 2.45, mods: "none" },
         { id: "milk", zh: "牛奶", en: "Milk", price: 1.30, mods: "none" },
         { id: "coffee", zh: "咖啡", en: "Coffee", price: 1.80, mods: "none" },
         { id: "cocoa", zh: "热可可", en: "Hot Cocoa", price: 2.30, mods: "none" },
@@ -1090,13 +1147,24 @@
   const modSets = {
     burger: {
       zh: "想改一下吗? (可不选)",
+      // Pick-one groups. The default option is pre-selected. Options with
+      // en: null print nothing on the cashier sheet (it's the normal way).
+      // "visible" groups are shown on the card without opening the ⚙️ section.
+      choices: [
+        { id: "onion", zh: "洋葱", en: "ONIONS", visible: true, options: [
+          { id: "raw", zh: "要生洋葱", en: "With Onions", default: true },
+          { id: "grilled", zh: "要炒洋葱", en: "Grilled Onions" },
+          { id: "none", zh: "不要洋葱", en: "No Onions" }
+        ]},
+        { id: "spread", zh: "酱", en: "SPREAD", options: [
+          { id: "normal", zh: "正常酱", en: null, default: true },
+          { id: "none", zh: "不要酱", en: "No Spread" },
+          { id: "extra", zh: "多加酱", en: "Extra Spread" }
+        ]}
+      ],
       options: [
         { id: "animal", zh: "野兽风 (加料更好吃)", en: "Animal Style" },
-        { id: "no_onion", zh: "不要洋葱", en: "No Onions" },
-        { id: "grilled_onion", zh: "要炒洋葱", en: "Grilled Onions" },
         { id: "no_tomato", zh: "不要番茄", en: "No Tomato" },
-        { id: "no_sauce", zh: "不要酱", en: "No Spread" },
-        { id: "extra_sauce", zh: "多加酱", en: "Extra Spread" },
         { id: "protein_mod", zh: "生菜包 (不要面包)", en: "Protein Style — lettuce wrap" },
         { id: "chopped_chilis", zh: "加辣椒", en: "Add Chopped Chilis" }
       ]
@@ -1168,24 +1236,51 @@
     return card;
   }
 
+  function renderChoiceGroup(item, group) {
+    const opts = group.options.map(o =>
+      `<label class="mod-chip choice-chip">
+        <input type="radio" name="${item.id}-${group.id}" data-item="${item.id}" data-choice="${group.id}" value="${o.id}"${o.default ? " checked" : ""}>
+        <span>${o.zh}${o.en ? `<span class="mod-en">${o.en}</span>` : ""}</span>
+      </label>`
+    ).join("");
+    return `<div class="choice-group">
+      <div class="choice-label">${group.zh} · ${group.en}</div>
+      <div class="choice-row">${opts}</div>
+    </div>`;
+  }
+
   function renderModToggle(item) {
     const mods = modSets[item.mods];
     if (!mods) return '';
+    const choices = mods.choices || [];
+    const visible = choices.filter(g => g.visible).map(g => renderChoiceGroup(item, g)).join("");
+    const hidden = choices.filter(g => !g.visible).map(g => renderChoiceGroup(item, g)).join("");
     const opts = mods.options.map(m =>
       `<label class="mod-chip">
-        <input type="checkbox" data-item="${item.id}" data-mod="${m.id}">
+        <input type="checkbox" data-item="${item.id}" data-mod="${m.id}"${m.id === "animal" ? ` onchange="onAnimalToggle(this)"` : ""}>
         <span>${m.zh}<span class="mod-en">${m.en}</span></span>
       </label>`
     ).join("");
     return `
+      ${visible}
       <button class="mod-toggle" onclick="toggleMods(this)">
         <span>⚙️ ${mods.zh}</span>
         <span class="arrow">▼</span>
       </button>
       <div class="mod-section">
+        ${hidden}
         <div class="mod-list">${opts}</div>
       </div>
     `;
+  }
+
+  // Animal Style already comes with grilled onions, so switch raw → grilled.
+  // (Animal Style + No Onions is still allowed.)
+  function onAnimalToggle(cb) {
+    if (!cb.checked) return;
+    const raw = document.querySelector(`input[name="${cb.dataset.item}-onion"][value="raw"]`);
+    const grilled = document.querySelector(`input[name="${cb.dataset.item}-onion"][value="grilled"]`);
+    if (raw && raw.checked && grilled) grilled.checked = true;
   }
 
   function toggleMods(btn) {
@@ -1221,15 +1316,30 @@
     if (!item) return;
     const qty = parseInt(document.getElementById("qty-" + itemId).value) || 1;
 
-    const modChecks = document.querySelectorAll(`input[data-item="${itemId}"]:checked`);
+    const modSet = modSets[item.mods];
+    const modChecks = document.querySelectorAll(`input[type="checkbox"][data-item="${itemId}"]:checked`);
     const selectedMods = [];
-    modChecks.forEach(cb => {
-      const modSet = modSets[item.mods];
-      if (modSet) {
+    if (modSet) {
+      // Order on the sheet: Animal Style, then pick-one groups (onions are
+      // always printed so the cashier doesn't have to ask), then the rest.
+      const checked = Array.from(modChecks).sort((a, b) =>
+        (b.dataset.mod === "animal") - (a.dataset.mod === "animal"));
+      const animalFirst = checked.length && checked[0].dataset.mod === "animal" ? [checked.shift()] : [];
+      animalFirst.forEach(cb => {
         const mod = modSet.options.find(o => o.id === cb.dataset.mod);
         if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
-      }
-    });
+      });
+      (modSet.choices || []).forEach(group => {
+        const picked = document.querySelector(`input[name="${itemId}-${group.id}"]:checked`);
+        const opt = group.options.find(o => o.id === (picked ? picked.value : null))
+                 || group.options.find(o => o.default);
+        if (opt && opt.en) selectedMods.push({ zh: opt.zh, en: opt.en });
+      });
+      checked.forEach(cb => {
+        const mod = modSet.options.find(o => o.id === cb.dataset.mod);
+        if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
+      });
+    }
 
     state.cart.push({
       uid: Date.now() + Math.random(),
@@ -1243,6 +1353,13 @@
 
     document.getElementById("qty-" + itemId).value = 1;
     modChecks.forEach(cb => cb.checked = false);
+    if (modSet) {
+      (modSet.choices || []).forEach(group => {
+        const def = group.options.find(o => o.default);
+        const el = def && document.querySelector(`input[name="${itemId}-${group.id}"][value="${def.id}"]`);
+        if (el) el.checked = true;
+      });
+    }
     const card = document.querySelector(`[data-item-id="${itemId}"]`);
     if (card) {
       const toggle = card.querySelector(".mod-toggle");
@@ -1283,7 +1400,7 @@
     }
 
     const subtotal = state.cart.reduce((s, i) => s + i.qty * i.price, 0);
-    const tax = subtotal * 0.0975;
+    const tax = subtotal * TAX_RATE;
     const total = subtotal + tax;
 
     let html = "";
@@ -1304,8 +1421,9 @@
 
     html += `<div class="cart-totals">
       <div class="cart-total-row"><span>小计</span><span>$${subtotal.toFixed(2)}</span></div>
-      <div class="cart-total-row"><span>税 (约9.75%)</span><span>$${tax.toFixed(2)}</span></div>
+      <div class="cart-total-row"><span>税 (${(TAX_RATE * 100).toFixed(2)}% 洛杉矶县)</span><span>$${tax.toFixed(2)}</span></div>
       <div class="cart-total-row big"><span>总计</span><span>$${total.toFixed(2)}</span></div>
+      <div class="price-note">价格是估计的 (${PRICES_UPDATED}),以店里为准</div>
     </div>`;
 
     body.innerHTML = html;
