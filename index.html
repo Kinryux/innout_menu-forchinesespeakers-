@@ -1358,8 +1358,9 @@
   // on the board, so their prices are estimates (the cart says so).
   // Drink sizes from the board (soft drinks, iced tea, lemonade)
   const DRINK_PRICES = { small: 2.30, medium: 2.45, large: 2.65, xlarge: 2.85 };
-  // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County)
-  const TAX_RATE = 0.0975;
+  // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County).
+  // 10.25% since Oct 1, 2026 (Measure ER added 0.5% countywide for 5 years; was 9.75%).
+  const TAX_RATE = 0.1025;
 
   const menu = {
     burgers: {
