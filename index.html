@@ -1598,9 +1598,15 @@
       // Wait a frame for layout
       await new Promise(r => requestAnimationFrame(r));
 
+      // 2x resolution for a crisp photo, but iPhones can't draw an image over
+      // ~16.7M pixels (it comes out blank), so very long orders use a bit less.
+      const MAX_PIXELS = 16000000;
+      const area = capture.offsetWidth * capture.offsetHeight;
+      const scale = Math.min(2, Math.sqrt(MAX_PIXELS / area));
+
       const canvas = await html2canvas(capture, {
         backgroundColor: "#fdfaf2",
-        scale: 2, // 2x resolution for crisp photo
+        scale,
         useCORS: true,
         allowTaint: false,
         logging: false,
