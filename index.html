@@ -159,17 +159,44 @@
     letter-spacing: 1px;
   }
 
+  /* Sticky wrapper. While compact, JS locks its height to the full size so the
+     page doesn't jump; the empty part is see-through and lets taps through. */
   .category-nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  .nav-inner {
+    pointer-events: auto;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     padding: 4px 12px 12px;
     background: var(--innout-red);
-    position: sticky;
-    top: 0;
-    z-index: 50;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: padding 0.2s ease, border-radius 0.2s ease;
   }
+
+  .cat-short { display: none; }
+
+  /* Compact: one slim row of short labels while scrolling down */
+  .nav-inner.compact {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 6px 10px 8px;
+    border-radius: 0 0 18px 18px;
+  }
+  .nav-inner.compact .cat-btn {
+    padding: 7px 2px;
+    font-size: clamp(14px, 4.4vw, 17px);
+    letter-spacing: 0;
+  }
+  .nav-inner.compact .cat-full,
+  .nav-inner.compact .cat-btn small { display: none; }
+  .nav-inner.compact .cat-short { display: inline; }
+  html[lang="es"] .nav-inner.compact .cat-btn { font-size: clamp(12px, 3.6vw, 15px); }
 
   .cat-btn {
     padding: 10px 8px;
@@ -503,34 +530,37 @@
     box-shadow: 0 2px 6px rgba(237, 28, 36, 0.3);
   }
 
+  /* Slim, frosted cart bar: the menu shows through softly as it scrolls by */
   .cart-bar {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: var(--ink);
+    background: rgba(26, 26, 26, 0.82);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
     color: #fff;
-    padding: 16px 18px calc(18px + env(safe-area-inset-bottom));
+    padding: 9px 14px calc(10px + env(safe-area-inset-bottom)) 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 24px 24px 0 0;
+    border-radius: 22px 22px 0 0;
     z-index: 100;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.18);
     gap: 12px;
   }
 
-  .cart-bar-info { display: flex; flex-direction: column; }
+  .cart-bar-info { display: flex; flex-direction: column; line-height: 1.05; }
 
   .cart-bar-count {
     font-family: 'Noto Sans SC', system-ui, sans-serif;
     font-weight: 900;
-    font-size: 18px;
+    font-size: 16px;
   }
 
   .cart-bar-total {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px;
+    font-size: 30px;
     color: var(--innout-yellow);
   }
 
@@ -538,7 +568,7 @@
     background: var(--innout-yellow);
     color: var(--ink);
     border: none;
-    padding: 14px 24px;
+    padding: 9px 22px;
     border-radius: 999px;
     font-family: 'Noto Sans SC', system-ui, sans-serif;
     font-weight: 900;
@@ -1105,7 +1135,9 @@
   <h1 data-i18n="title">妈妈的点餐单</h1>
 </header>
 
-<nav class="category-nav" id="tabs"></nav>
+<div class="category-nav" id="navWrap">
+  <nav class="nav-inner" id="tabs"></nav>
+</div>
 
 <main>
   <div class="instruction-box">
@@ -1186,7 +1218,7 @@
   // App version shown in the header. Bump this together with CACHE_NAME in
   // service-worker.js on every release, so phones pick up the update and
   // you can see which version she has.
-  const APP_VERSION = "v13";
+  const APP_VERSION = "v14";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
   // ============ LANGUAGE ============
@@ -1309,6 +1341,7 @@
     const toast = document.getElementById("toast");
     clearTimeout(toast._timeout);
     toast.classList.remove("show");
+    setNavCompact(false);  // re-measure the full tabs in the new language
     applyStaticText();
     renderMenu();
     updateCartBar();
@@ -1325,7 +1358,7 @@
 
   const menu = {
     burgers: {
-      zh: "汉堡", es: "Hamburguesas", en: "BURGERS",
+      zh: "汉堡", es: "Hamburguesas", en: "BURGERS", zhShort: "汉堡", esShort: "Burgers",
       items: [
         { id: "dbldbl", zh: "双层双层 (最受欢迎)", es: "Doble-Doble (la más popular)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", desc_es: "2 carnes + 2 quesos + lechuga + tomate + cebolla + salsa", price: 6.35, mods: "burger" },
         { id: "cheese", zh: "芝士汉堡", es: "Hamburguesa con queso", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", desc_es: "1 carne + 1 queso + lechuga + tomate + cebolla + salsa", price: 4.40, mods: "burger" },
@@ -1337,7 +1370,7 @@
       ]
     },
     sides: {
-      zh: "薯条 / 套餐", es: "Papas / Combos", en: "FRIES / COMBO",
+      zh: "薯条 / 套餐", es: "Papas / Combos", en: "FRIES / COMBO", zhShort: "薯条套餐", esShort: "Papas",
       items: [
         { id: "fries", zh: "薯条", es: "Papas fritas", en: "French Fries", desc: "现切新鲜土豆", desc_es: "Papas frescas, cortadas al momento", price: 2.40, mods: "fries" },
         { id: "animalfries", zh: "野兽薯条", es: "Papas Animal Style", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", desc_es: "Papas + queso + cebolla asada + salsa", secret: true, price: 4.60, mods: "none" },
@@ -1348,7 +1381,7 @@
       ]
     },
     drinks: {
-      zh: "饮料", es: "Bebidas", en: "DRINKS",
+      zh: "饮料", es: "Bebidas", en: "DRINKS", zhShort: "饮料", esShort: "Bebidas",
       items: [
         { id: "coke", zh: "可乐", es: "Coca-Cola", en: "Coke", price: DRINK_PRICES.medium, mods: "drink" },
         { id: "cherrycoke", zh: "樱桃可乐", es: "Coca-Cola de cereza", en: "Cherry Coke", price: DRINK_PRICES.medium, mods: "drink" },
@@ -1367,7 +1400,7 @@
       ]
     },
     shakes: {
-      zh: "奶昔", es: "Malteadas", en: "SHAKES",
+      zh: "奶昔", es: "Malteadas", en: "SHAKES", zhShort: "奶昔", esShort: "Malteadas",
       items: [
         { id: "van", zh: "香草奶昔", es: "Malteada de vainilla", en: "Vanilla Shake", price: 3.20, mods: "none" },
         { id: "choc", zh: "巧克力奶昔", es: "Malteada de chocolate", en: "Chocolate Shake", price: 3.20, mods: "none" },
@@ -1456,7 +1489,9 @@
       const btn = document.createElement("button");
       btn.className = "cat-btn" + (active ? " active" : "");
       btn.dataset.tab = key;
-      btn.innerHTML = `${L(cat)}<small>${cat.en}</small>`;
+      // full label + English (normal), short label only (compact, while scrolling)
+      const short = lang === "es" ? cat.esShort : cat.zhShort;
+      btn.innerHTML = `<span class="cat-full">${L(cat)}</span><span class="cat-short">${short}</span><small>${cat.en}</small>`;
       btn.onclick = () => selectTab(key);
       tabsEl.appendChild(btn);
 
@@ -1946,6 +1981,43 @@
   document.getElementById("cartModal").addEventListener("click", e => {
     if (e.target.id === "cartModal") closeCart();
   });
+
+  // ============ COMPACT TABS WHILE SCROLLING ============
+  // Scrolling down shrinks the tabs to one slim row; scrolling up (or being
+  // near the top) brings the full tabs back. The wrapper keeps its full height
+  // while compact, so nothing on the page moves when the tabs change size.
+  const navWrap = document.getElementById("navWrap");
+  let navCompact = false;
+  let lastScrollY = window.scrollY;
+  let scrollTicking = false;
+
+  function setNavCompact(on) {
+    if (on === navCompact) return;
+    if (on) navWrap.style.height = navWrap.offsetHeight + "px";
+    else navWrap.style.height = "";
+    navCompact = on;
+    tabsEl.classList.toggle("compact", on);
+  }
+
+  function onScroll() {
+    scrollTicking = false;
+    const y = window.scrollY;
+    const maxY = document.documentElement.scrollHeight - window.innerHeight;
+    if (y < 0 || y > maxY) return;                  // iPhone bounce at the ends
+    const headerH = document.querySelector(".header").offsetHeight;
+    if (y <= headerH + 20) setNavCompact(false);     // near the top: full tabs
+    else if (y - lastScrollY > 8) setNavCompact(true);
+    else if (lastScrollY - y > 8) setNavCompact(false);
+    else return;                                     // small wiggle: keep adding up
+    lastScrollY = y;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!scrollTicking) { scrollTicking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  // Sizes change on rotate; start fresh with full tabs
+  window.addEventListener("resize", () => { setNavCompact(false); lastScrollY = window.scrollY; });
+  // ============ END COMPACT TABS ============
 
   applyStaticText();
   renderMenu();
