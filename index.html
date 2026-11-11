@@ -536,9 +536,11 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(26, 26, 26, 0.82);
-    -webkit-backdrop-filter: blur(14px) saturate(140%);
-    backdrop-filter: blur(14px) saturate(140%);
+    /* 30% more see-through than before (0.82 → 0.57); a stronger blur keeps
+       what shows through soft so the text on top stays readable */
+    background: rgba(26, 26, 26, 0.57);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    backdrop-filter: blur(20px) saturate(150%);
     color: #fff;
     padding: 9px 14px calc(10px + env(safe-area-inset-bottom)) 20px;
     display: flex;
@@ -556,12 +558,14 @@
     font-family: 'Noto Sans SC', system-ui, sans-serif;
     font-weight: 900;
     font-size: 16px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   }
 
   .cart-bar-total {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 30px;
     color: var(--innout-yellow);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75), 0 0 8px rgba(0, 0, 0, 0.45);
   }
 
   .cart-bar-btn {
@@ -1218,7 +1222,7 @@
   // App version shown in the header. Bump this together with CACHE_NAME in
   // service-worker.js on every release, so phones pick up the update and
   // you can see which version she has.
-  const APP_VERSION = "v14";
+  const APP_VERSION = "v15";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
   // ============ LANGUAGE ============
