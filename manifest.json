@@ -1,7 +1,7 @@
 {
-  "name": "妈妈的 In-N-Out 点餐",
-  "short_name": "妈妈点餐",
-  "description": "In-N-Out bilingual ordering helper for Mom",
+  "name": "In-N-Out Pal",
+  "short_name": "In-N-Out Pal",
+  "description": "In-N-Out ordering helper: order in Chinese or Spanish, show the cashier in English",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",

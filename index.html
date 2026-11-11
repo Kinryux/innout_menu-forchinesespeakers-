@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>妈妈的 In-N-Out 点餐</title>
+<title>In-N-Out Pal</title>
 
 <!-- PWA: manifest, icon, theme colors, standalone mode -->
 <link rel="manifest" href="manifest.json">
@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="妈妈点餐">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-title" content="In-N-Out Pal">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -62,18 +62,82 @@
     text-align: left;
   }
 
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
   .app-version {
-    position: absolute;
-    top: 16px;
-    right: 16px;
+    display: inline-block;
+    margin-left: 6px;
+    vertical-align: 1px;
     background: rgba(0, 0, 0, 0.18);
     color: rgba(255, 255, 255, 0.9);
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 15px;
+    font-style: normal;
+    font-size: 13px;
     letter-spacing: 1.5px;
-    padding: 3px 10px;
+    padding: 1px 8px;
     border-radius: 999px;
   }
+
+  /* 中文 / Español switch — selected = yellow, like everything else */
+  .lang-switch {
+    display: flex;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 999px;
+    padding: 3px;
+  }
+
+  .lang-switch button {
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .lang-switch button.active {
+    background: var(--innout-yellow);
+    color: var(--ink);
+  }
+
+  .step-note { font-size: 17px; }
+
+  /* Spanish is an extra for other people (not Mom), and Spanish words run
+     longer, so text is a bit smaller in Spanish to keep everything fitting. */
+  html[lang="es"] .header h1 { font-size: 28px; }
+  html[lang="es"] .cat-btn { font-size: 17px; letter-spacing: 0; }
+  html[lang="es"] .instruction-box { font-size: 16px; }
+  html[lang="es"] .step-note { font-size: 15px; }
+  html[lang="es"] .section-title { font-size: 22px; }
+  html[lang="es"] .item-zh { font-size: 21px; }
+  html[lang="es"] .item-desc { font-size: 15px; }
+  html[lang="es"] .secret-badge { font-size: 12px; letter-spacing: 0; }
+  html[lang="es"] .mod-toggle { font-size: 15px; }
+  html[lang="es"] .mod-chip { font-size: 15px; }
+  html[lang="es"] .choice-chip { font-size: 14px; }
+  html[lang="es"] .choice-label { font-size: 14px; }
+  html[lang="es"] .add-btn { font-size: 18px; }
+  html[lang="es"] .cart-bar-count { font-size: 16px; }
+  html[lang="es"] .cart-bar-btn { font-size: 17px; }
+  html[lang="es"] .modal-head h2 { font-size: 24px; }
+  html[lang="es"] .cart-item-name { font-size: 19px; }
+  html[lang="es"] .cart-item-mods { font-size: 15px; }
+  html[lang="es"] .cart-total-row { font-size: 16px; }
+  html[lang="es"] .modal-footer button { font-size: 15px; }
+  html[lang="es"] .show-mode-save,
+  html[lang="es"] .show-mode-close { font-size: 14px; }
+  html[lang="es"] .toast { font-size: 16px; }
 
   .header-brand {
     font-family: 'Fraunces', 'Bebas Neue', serif;
@@ -1012,7 +1076,11 @@
     font-weight: 900;
     font-size: 18px;
     pointer-events: none;
-    white-space: nowrap;
+    /* one line when it fits; long (e.g. Spanish) names wrap instead of
+       running off the screen */
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    text-align: center;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 
@@ -1026,9 +1094,14 @@
 <body>
 
 <header class="header">
-  <div class="header-brand">In-N-Out</div>
-  <h1>妈妈的点餐单</h1>
-  <span class="app-version" id="appVersion"></span>
+  <div class="header-top">
+    <div class="header-brand">In-N-Out <span class="app-version" id="appVersion"></span></div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-lang="zh" onclick="setLang('zh')">中文</button>
+      <button type="button" data-lang="es" onclick="setLang('es')">Español</button>
+    </div>
+  </div>
+  <h1 data-i18n="title">妈妈的点餐单</h1>
 </header>
 
 <nav class="category-nav" id="tabs"></nav>
@@ -1037,19 +1110,19 @@
   <div class="instruction-box">
     <div class="step">
       <div class="step-num">1</div>
-      <div>选菜单,按红色 <span style="color:var(--innout-red-deep);">"+ 加入购物车"</span></div>
+      <div data-i18n="step1"></div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div>按下面 <span style="color:var(--innout-red-deep);">"查看订单"</span> 确认</div>
+      <div data-i18n="step2"></div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div>按 <span style="color:var(--innout-red-deep);">"给店员看"</span>,把手机给店员</div>
+      <div data-i18n="step3"></div>
     </div>
     <div class="step" style="margin-top:8px;padding-top:8px;border-top:2px dashed var(--ink);">
       <div class="step-num" style="background:var(--ink);">📸</div>
-      <div style="font-size:17px;">也可以按 <span style="color:var(--innout-red-deep);">"存图"</span> 保存到相册,下次直接给店员看</div>
+      <div class="step-note" data-i18n="step4"></div>
     </div>
   </div>
 
@@ -1058,11 +1131,11 @@
 
 <div class="cart-bar">
   <div class="cart-bar-info">
-    <span class="cart-bar-count" id="cartCount">购物车: 0 件</span>
+    <span class="cart-bar-count" id="cartCount"></span>
     <span class="cart-bar-total" id="cartTotal">$0.00</span>
   </div>
   <button class="cart-bar-btn" onclick="openCart()">
-    查看订单
+    <span data-i18n="viewOrder">查看订单</span>
     <small>VIEW ORDER</small>
   </button>
 </div>
@@ -1070,13 +1143,13 @@
 <div class="modal-overlay" id="cartModal">
   <div class="modal">
     <div class="modal-head">
-      <h2>我的订单<small>MY ORDER</small></h2>
+      <h2><span data-i18n="myOrder">我的订单</span><small>MY ORDER</small></h2>
       <button class="modal-close" onclick="closeCart()">✕</button>
     </div>
     <div class="modal-body" id="cartBody"></div>
     <div class="modal-footer">
-      <button class="btn-clear" onclick="clearCart()">清空</button>
-      <button class="btn-show" onclick="showOrderSheet()">给店员看 ▶</button>
+      <button class="btn-clear" onclick="clearCart()" data-i18n="clear">清空</button>
+      <button class="btn-show" onclick="showOrderSheet()" data-i18n="showCashier">给店员看 ▶</button>
     </div>
   </div>
 </div>
@@ -1090,8 +1163,8 @@
     <div id="showBody"></div>
   </div>
   <div class="show-mode-footer">
-    <button class="show-mode-save" onclick="savePhoto()">📸 存图</button>
-    <button class="show-mode-close" onclick="hideShowMode()">← 返回</button>
+    <button class="show-mode-save" onclick="savePhoto()" data-i18n="savePhoto">📸 存图</button>
+    <button class="show-mode-close" onclick="hideShowMode()" data-i18n="back">← 返回</button>
   </div>
 </div>
 
@@ -1100,7 +1173,7 @@
   <div class="photo-preview-msg" id="photoPreviewMsg"></div>
   <div class="photo-preview-actions">
     <button id="photoShareBtn" onclick="sharePhoto()">📤 分享/存图</button>
-    <button class="btn-close-preview" onclick="closePhotoPreview()">关闭</button>
+    <button class="btn-close-preview" onclick="closePhotoPreview()" data-i18n="close">关闭</button>
   </div>
 </div>
 
@@ -1112,12 +1185,138 @@
   // App version shown in the header. Bump this together with CACHE_NAME in
   // service-worker.js on every release, so phones pick up the update and
   // you can see which version she has.
-  const APP_VERSION = "v11";
+  const APP_VERSION = "v12";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
+  // ============ LANGUAGE ============
+  // Chinese is the default. Spanish is an optional extra, remembered per phone.
+  // Whatever the language, the cashier sheet and saved image stay in English.
+  let lang = "zh";
+  try { if (localStorage.getItem("innout-lang") === "es") lang = "es"; } catch (e) {}
+
+  const HL = t => `<span style="color:var(--innout-red-deep);">"${t}"</span>`;
+  const UI = {
+    zh: {
+      docTitle: "In-N-Out Pal",
+      title: "妈妈的点餐单",
+      step1: `选菜单,按红色 ${HL("+ 加入购物车")}`,
+      step2: `按下面 ${HL("查看订单")} 确认`,
+      step3: `按 ${HL("给店员看")},把手机给店员`,
+      step4: `也可以按 ${HL("存图")} 保存到相册,下次直接给店员看`,
+      viewOrder: "查看订单",
+      myOrder: "我的订单",
+      clear: "清空",
+      showCashier: "给店员看 ▶",
+      savePhoto: "📸 存图",
+      back: "← 返回",
+      close: "关闭",
+      addBtn: "+ 加入购物车",
+      secret: "隐藏菜单",
+      cartCount: n => `购物车: ${n} 件`,
+      added: name => `✓ ${name} 已加入`,
+      emptyTitle: "购物车是空的",
+      emptySub: "请先选择菜单",
+      remove: "删除",
+      subtotal: "小计",
+      tax: pct => `税 (${pct}% 洛杉矶县)`,
+      total: "总计",
+      priceNote: "价格来自店内菜单 (2026年11月),隐藏菜单的价格是估计的",
+      confirmClear: "确定要清空吗?",
+      cartEmptyAlert: "购物车是空的",
+      togoSub: "Not eating in vehicle · 不在车上吃",
+      generating: "⏳ 生成中...",
+      imgFail: "生成图片失败,请再试一次",
+      imgFailErr: "生成图片失败: ",
+      imgReadyShare: "<strong>订单图片已生成 ✓</strong>点下面按钮保存到相册或分享",
+      imgReadyDownload: "<strong>订单图片已生成 ✓</strong>点下面按钮下载图片",
+      shareBtn: "📤 分享/存图",
+      downloadBtn: "💾 下载",
+      downloaded: "✓ 图片已下载",
+      shareTitle: "In-N-Out 订单",
+      imgFooter: date => `妈妈的 IN-N-OUT 点餐 · ${date}`,
+      imgAlt: "订单",
+      locale: "zh-CN"
+    },
+    es: {
+      docTitle: "In-N-Out Pal",
+      title: "Mi pedido",
+      step1: `Elige del menú y toca ${HL("+ Agregar")}`,
+      step2: `Toca ${HL("Ver pedido")} abajo para revisar`,
+      step3: `Toca ${HL("Mostrar al cajero")} y dale el teléfono`,
+      step4: `O toca ${HL("Guardar foto")} para guardarlo y mostrarlo la próxima vez`,
+      viewOrder: "Ver pedido",
+      myOrder: "Mi pedido",
+      clear: "Vaciar",
+      showCashier: "Mostrar al cajero ▶",
+      savePhoto: "📸 Guardar foto",
+      back: "← Volver",
+      close: "Cerrar",
+      addBtn: "+ Agregar",
+      secret: "Menú secreto",
+      cartCount: n => `Carrito: ${n}`,
+      added: name => `✓ Se agregó: ${name}`,
+      emptyTitle: "El carrito está vacío",
+      emptySub: "Primero elige algo del menú",
+      remove: "Quitar",
+      subtotal: "Subtotal",
+      tax: pct => `Impuesto (${pct}% condado de LA)`,
+      total: "Total",
+      priceNote: "Precios del menú de la tienda (nov. 2026). Los del menú secreto son estimados.",
+      confirmClear: "¿Vaciar el carrito?",
+      cartEmptyAlert: "El carrito está vacío",
+      togoSub: "Not eating in vehicle · No comeremos en el carro",
+      generating: "⏳ Creando...",
+      imgFail: "No se pudo crear la imagen. Intenta de nuevo.",
+      imgFailErr: "No se pudo crear la imagen: ",
+      imgReadyShare: "<strong>Imagen lista ✓</strong>Toca abajo para guardarla o compartirla",
+      imgReadyDownload: "<strong>Imagen lista ✓</strong>Toca abajo para descargarla",
+      shareBtn: "📤 Compartir/Guardar",
+      downloadBtn: "💾 Descargar",
+      downloaded: "✓ Imagen descargada",
+      shareTitle: "Pedido In-N-Out",
+      imgFooter: date => `PEDIDO IN-N-OUT · ${date}`,
+      imgAlt: "Pedido",
+      locale: "es-US"
+    }
+  };
+
+  // UI text in the current language (falls back to Chinese)
+  function T(key, ...args) {
+    const v = UI[lang][key] != null ? UI[lang][key] : UI.zh[key];
+    return typeof v === "function" ? v(...args) : v;
+  }
+  // Name / description of a menu item, option or group in the current language
+  const L = o => (lang === "es" && o.es) ? o.es : o.zh;
+  const D = o => (lang === "es" && o.desc_es) ? o.desc_es : o.desc;
+
+  function applyStaticText() {
+    document.documentElement.lang = lang === "es" ? "es" : "zh-CN";
+    document.title = T("docTitle");
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.innerHTML = T(el.dataset.i18n); });
+    document.getElementById("photoPreviewImg").alt = T("imgAlt");
+    document.querySelectorAll(".lang-switch button").forEach(b => {
+      b.classList.toggle("active", b.dataset.lang === lang);
+      b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+    });
+  }
+
+  // Switching keeps the cart; options picked on cards (not yet added) reset.
+  function setLang(newLang) {
+    if (newLang === lang) return;
+    lang = newLang;
+    try { localStorage.setItem("innout-lang", lang); } catch (e) {}
+    const toast = document.getElementById("toast");
+    clearTimeout(toast._timeout);
+    toast.classList.remove("show");
+    applyStaticText();
+    renderMenu();
+    updateCartBar();
+    if (document.getElementById("cartModal").classList.contains("active")) renderCartBody();
+  }
+  // ============ END LANGUAGE ============
+
   // Prices: from the 2026 drive-thru menu board photo. Secret-menu items aren't
-  // on the board, so their prices are estimates (marked "est." below).
-  const PRICES_UPDATED = "2026年11月";
+  // on the board, so their prices are estimates (the cart says so).
   // Drink sizes from the board (soft drinks, iced tea, lemonade)
   const DRINK_PRICES = { small: 2.30, medium: 2.45, large: 2.65, xlarge: 2.85 };
   // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County)
@@ -1125,102 +1324,102 @@
 
   const menu = {
     burgers: {
-      zh: "汉堡", en: "BURGERS",
+      zh: "汉堡", es: "Hamburguesas", en: "BURGERS",
       items: [
-        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 6.35, mods: "burger" },
-        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.40, mods: "burger" },
-        { id: "hamburger", zh: "汉堡包 (无芝士)", en: "Hamburger", desc: "一片肉饼 + 生菜 + 番茄 + 洋葱 + 酱", price: 3.85, mods: "burger" },
-        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 8.35, mods: "burger" },
-        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 10.35, mods: "burger" },
-        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 6.35, mods: "burger" },
-        { id: "grilled", zh: "素食芝士堡 (无肉)", en: "Grilled Cheese", desc: "只有芝士和蔬菜,没有肉", secret: true, price: 3.85, mods: "burger" }
+        { id: "dbldbl", zh: "双层双层 (最受欢迎)", es: "Doble-Doble (la más popular)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", desc_es: "2 carnes + 2 quesos + lechuga + tomate + cebolla + salsa", price: 6.35, mods: "burger" },
+        { id: "cheese", zh: "芝士汉堡", es: "Hamburguesa con queso", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", desc_es: "1 carne + 1 queso + lechuga + tomate + cebolla + salsa", price: 4.40, mods: "burger" },
+        { id: "hamburger", zh: "汉堡包 (无芝士)", es: "Hamburguesa (sin queso)", en: "Hamburger", desc: "一片肉饼 + 生菜 + 番茄 + 洋葱 + 酱", desc_es: "1 carne + lechuga + tomate + cebolla + salsa", price: 3.85, mods: "burger" },
+        { id: "3x3", zh: "三层三层", es: "Triple-Triple", en: "3x3", desc: "三片肉饼 + 三片芝士", desc_es: "3 carnes + 3 quesos", secret: true, price: 8.35, mods: "burger" },
+        { id: "4x4", zh: "四层四层", es: "Cuádruple-Cuádruple", en: "4x4", desc: "四片肉饼 + 四片芝士", desc_es: "4 carnes + 4 quesos", secret: true, price: 10.35, mods: "burger" },
+        { id: "protein", zh: "生菜包双层 (低碳)", es: "Doble-Doble en lechuga (sin pan)", en: "Protein Style Double-Double", desc: "用生菜代替面包", desc_es: "Envuelta en lechuga en vez de pan", secret: true, price: 6.35, mods: "burger" },
+        { id: "grilled", zh: "素食芝士堡 (无肉)", es: "Queso a la plancha (sin carne)", en: "Grilled Cheese", desc: "只有芝士和蔬菜,没有肉", desc_es: "Solo queso y verduras, sin carne", secret: true, price: 3.85, mods: "burger" }
       ]
     },
     sides: {
-      zh: "薯条 / 套餐", en: "FRIES / COMBO",
+      zh: "薯条 / 套餐", es: "Papas / Combos", en: "FRIES / COMBO",
       items: [
-        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.40, mods: "fries" },
-        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.60, mods: "none" },
-        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.50, mods: "none" },
-        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 中杯饮料", price: 11.20, mods: "combo" },
-        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 中杯饮料", price: 9.25, mods: "combo" },
-        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 中杯饮料", price: 8.70, mods: "combo" }
+        { id: "fries", zh: "薯条", es: "Papas fritas", en: "French Fries", desc: "现切新鲜土豆", desc_es: "Papas frescas, cortadas al momento", price: 2.40, mods: "fries" },
+        { id: "animalfries", zh: "野兽薯条", es: "Papas Animal Style", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", desc_es: "Papas + queso + cebolla asada + salsa", secret: true, price: 4.60, mods: "none" },
+        { id: "cheesefries", zh: "芝士薯条", es: "Papas con queso", en: "Cheese Fries", desc: "薯条加芝士", desc_es: "Papas con queso derretido", secret: true, price: 3.50, mods: "none" },
+        { id: "combo1", zh: "1号套餐 (双层双层)", es: "Combo #1 (Doble-Doble)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 中杯饮料", desc_es: "Doble-Doble + papas + bebida mediana", price: 11.20, mods: "combo" },
+        { id: "combo2", zh: "2号套餐 (芝士汉堡)", es: "Combo #2 (con queso)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 中杯饮料", desc_es: "Hamburguesa con queso + papas + bebida mediana", price: 9.25, mods: "combo" },
+        { id: "combo3", zh: "3号套餐 (汉堡包)", es: "Combo #3 (Hamburguesa)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 中杯饮料", desc_es: "Hamburguesa + papas + bebida mediana", price: 8.70, mods: "combo" }
       ]
     },
     drinks: {
-      zh: "饮料", en: "DRINKS",
+      zh: "饮料", es: "Bebidas", en: "DRINKS",
       items: [
-        { id: "coke", zh: "可乐", en: "Coke", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "cherrycoke", zh: "樱桃可乐", en: "Cherry Coke", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "diet", zh: "健怡可乐 (无糖)", en: "Diet Coke", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "7up", zh: "七喜 (像雪碧)", en: "7 Up", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "rootbeer", zh: "沙士 (根汁汽水)", en: "Root Beer", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "lemonade", zh: "粉红柠檬水", en: "Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "litelemonade", zh: "低糖粉红柠檬水", en: "Lite Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: DRINK_PRICES.medium, mods: "drink" },
-        { id: "milk", zh: "牛奶", en: "Milk", price: 1.25, mods: "none" },
-        { id: "coffee", zh: "咖啡", en: "Coffee", price: 1.65, mods: "none" },
-        { id: "cocoa", zh: "热可可", en: "Hot Cocoa", price: 2.45, mods: "none" },
-        { id: "water", zh: "水 (免费)", en: "Water Cup — free", price: 0, mods: "none" }
+        { id: "coke", zh: "可乐", es: "Coca-Cola", en: "Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "cherrycoke", zh: "樱桃可乐", es: "Coca-Cola de cereza", en: "Cherry Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "diet", zh: "健怡可乐 (无糖)", es: "Coca-Cola de dieta", en: "Diet Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "7up", zh: "七喜 (像雪碧)", es: "7 Up", en: "7 Up", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "drpepper", zh: "胡椒博士", es: "Dr Pepper", en: "Dr Pepper", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "rootbeer", zh: "沙士 (根汁汽水)", es: "Root Beer", en: "Root Beer", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "icedtea", zh: "冰茶 (无糖)", es: "Té helado (sin azúcar)", en: "Iced Tea", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "lemonade", zh: "粉红柠檬水", es: "Limonada rosa", en: "Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "litelemonade", zh: "低糖粉红柠檬水", es: "Limonada rosa light", en: "Lite Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "arnold", zh: "茶加柠檬水", es: "Mitad té, mitad limonada", en: "Arnold Palmer — half tea half lemonade", secret: true, price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "milk", zh: "牛奶", es: "Leche", en: "Milk", price: 1.25, mods: "none" },
+        { id: "coffee", zh: "咖啡", es: "Café", en: "Coffee", price: 1.65, mods: "none" },
+        { id: "cocoa", zh: "热可可", es: "Chocolate caliente", en: "Hot Cocoa", price: 2.45, mods: "none" },
+        { id: "water", zh: "水 (免费)", es: "Agua (gratis)", en: "Water Cup — free", price: 0, mods: "none" }
       ]
     },
     shakes: {
-      zh: "奶昔", en: "SHAKES",
+      zh: "奶昔", es: "Malteadas", en: "SHAKES",
       items: [
-        { id: "van", zh: "香草奶昔", en: "Vanilla Shake", price: 3.20, mods: "none" },
-        { id: "choc", zh: "巧克力奶昔", en: "Chocolate Shake", price: 3.20, mods: "none" },
-        { id: "straw", zh: "草莓奶昔", en: "Strawberry Shake", price: 3.20, mods: "none" },
-        { id: "neo", zh: "三色奶昔 (三种口味)", en: "Neapolitan Shake — all three flavors", secret: true, price: 3.20, mods: "none" },
-        { id: "blackwhite", zh: "黑白奶昔", en: "Black & White Shake — chocolate and vanilla", secret: true, price: 3.20, mods: "none" }
+        { id: "van", zh: "香草奶昔", es: "Malteada de vainilla", en: "Vanilla Shake", price: 3.20, mods: "none" },
+        { id: "choc", zh: "巧克力奶昔", es: "Malteada de chocolate", en: "Chocolate Shake", price: 3.20, mods: "none" },
+        { id: "straw", zh: "草莓奶昔", es: "Malteada de fresa", en: "Strawberry Shake", price: 3.20, mods: "none" },
+        { id: "neo", zh: "三色奶昔 (三种口味)", es: "Malteada napolitana (3 sabores)", en: "Neapolitan Shake — all three flavors", secret: true, price: 3.20, mods: "none" },
+        { id: "blackwhite", zh: "黑白奶昔", es: "Malteada blanco y negro", en: "Black & White Shake — chocolate and vanilla", secret: true, price: 3.20, mods: "none" }
       ]
     }
   };
 
   const modSets = {
     burger: {
-      zh: "想改一下吗? (可不选)",
+      zh: "想改一下吗? (可不选)", es: "¿Algún cambio? (opcional)",
       // Pick-one groups. The default option is pre-selected. Options with
       // en: null print nothing on the cashier sheet (it's the normal way).
       // "visible" groups are shown on the card without opening the ⚙️ section.
       choices: [
-        { id: "onion", zh: "洋葱", en: "ONIONS", visible: true, options: [
-          { id: "raw", zh: "要生洋葱", en: "With Onions", default: true },
-          { id: "grilled", zh: "要炒洋葱", en: "Grilled Onions" },
-          { id: "none", zh: "不要洋葱", en: "No Onions" }
+        { id: "onion", zh: "洋葱", es: "Cebolla", en: "ONIONS", visible: true, options: [
+          { id: "raw", zh: "要生洋葱", es: "Con cebolla", en: "With Onions", default: true },
+          { id: "grilled", zh: "要炒洋葱", es: "Cebolla asada", en: "Grilled Onions" },
+          { id: "none", zh: "不要洋葱", es: "Sin cebolla", en: "No Onions" }
         ]},
-        { id: "spread", zh: "酱", en: "SPREAD", options: [
-          { id: "normal", zh: "正常酱", en: null, default: true },
-          { id: "none", zh: "不要酱", en: "No Spread" },
-          { id: "extra", zh: "多加酱", en: "Extra Spread" }
+        { id: "spread", zh: "酱", es: "Salsa", en: "SPREAD", options: [
+          { id: "normal", zh: "正常酱", es: "Normal", en: null, default: true },
+          { id: "none", zh: "不要酱", es: "Sin salsa", en: "No Spread" },
+          { id: "extra", zh: "多加酱", es: "Extra salsa", en: "Extra Spread" }
         ]}
       ],
       options: [
-        { id: "animal", zh: "野兽风 (加料更好吃)", en: "Animal Style" },
-        { id: "no_tomato", zh: "不要番茄", en: "No Tomato" },
-        { id: "protein_mod", zh: "生菜包 (不要面包)", en: "Protein Style — lettuce wrap" },
-        { id: "chopped_chilis", zh: "加辣椒", en: "Add Chopped Chilis" }
+        { id: "animal", zh: "野兽风 (加料更好吃)", es: "Animal Style (más sabrosa)", en: "Animal Style" },
+        { id: "no_tomato", zh: "不要番茄", es: "Sin tomate", en: "No Tomato" },
+        { id: "protein_mod", zh: "生菜包 (不要面包)", es: "En lechuga (sin pan)", en: "Protein Style — lettuce wrap" },
+        { id: "chopped_chilis", zh: "加辣椒", es: "Con chiles picados", en: "Add Chopped Chilis" }
       ]
     },
     drink: {
       choices: [
-        { id: "size", zh: "大小", en: "SIZE", visible: true, options: [
-          { id: "small", zh: "小杯", en: "Small", price: DRINK_PRICES.small },
-          { id: "medium", zh: "中杯", en: "Medium", price: DRINK_PRICES.medium, default: true },
-          { id: "large", zh: "大杯", en: "Large", price: DRINK_PRICES.large },
-          { id: "xlarge", zh: "特大杯", en: "X-Large", price: DRINK_PRICES.xlarge }
+        { id: "size", zh: "大小", es: "Tamaño", en: "SIZE", visible: true, options: [
+          { id: "small", zh: "小杯", es: "Chico", en: "Small", price: DRINK_PRICES.small },
+          { id: "medium", zh: "中杯", es: "Mediano", en: "Medium", price: DRINK_PRICES.medium, default: true },
+          { id: "large", zh: "大杯", es: "Grande", en: "Large", price: DRINK_PRICES.large },
+          { id: "xlarge", zh: "特大杯", es: "Extra grande", en: "X-Large", price: DRINK_PRICES.xlarge }
         ]}
       ],
       options: []
     },
     fries: {
-      zh: "想改一下吗? (可不选)",
+      zh: "想改一下吗? (可不选)", es: "¿Algún cambio? (opcional)",
       options: [
-        { id: "well_fries", zh: "多煎一下 (更脆)", en: "Well Done" },
-        { id: "light", zh: "少煎一下 (软一点)", en: "Light Well" },
-        { id: "animal_style_fries", zh: "加野兽料", en: "Animal Style" },
-        { id: "cheese_only", zh: "加芝士", en: "Add Cheese" }
+        { id: "well_fries", zh: "多煎一下 (更脆)", es: "Bien doradas (más crujientes)", en: "Well Done" },
+        { id: "light", zh: "少煎一下 (软一点)", es: "Menos doradas (más suaves)", en: "Light Well" },
+        { id: "animal_style_fries", zh: "加野兽料", es: "Animal Style", en: "Animal Style" },
+        { id: "cheese_only", zh: "加芝士", es: "Con queso", en: "Add Cheese" }
       ]
     }
   };
@@ -1229,13 +1428,14 @@
   // regular (non-secret) drinks menu, so it stays in sync with it.
   modSets.combo = {
     zh: modSets.burger.zh,
+    es: modSets.burger.es,
     choices: [
       ...modSets.burger.choices,
-      { id: "drink", zh: "饮料 (中杯)", en: "DRINK (MEDIUM)", visible: true, printLast: true,
-        zhPrefix: "饮料: ", enPrefix: "Drink: Medium ",
+      { id: "drink", zh: "饮料 (中杯)", es: "Bebida (mediana)", en: "DRINK (MEDIUM)", visible: true, printLast: true,
+        zhPrefix: "饮料: ", esPrefix: "Bebida: ", enPrefix: "Drink: Medium ",
         options: menu.drinks.items
           .filter(d => d.mods === "drink" && !d.secret)
-          .map((d, i) => ({ id: d.id, zh: d.zh, en: d.en, default: i === 0 }))
+          .map((d, i) => ({ id: d.id, zh: d.zh, es: d.es, en: d.en, default: i === 0 }))
       }
     ],
     options: modSets.burger.options
@@ -1246,44 +1446,50 @@
   const tabsEl = document.getElementById("tabs");
   const panelsEl = document.getElementById("panels");
 
-  Object.entries(menu).forEach(([key, cat], i) => {
-    const btn = document.createElement("button");
-    btn.className = "cat-btn" + (i === 0 ? " active" : "");
-    btn.dataset.tab = key;
-    btn.innerHTML = `${cat.zh}<small>${cat.en}</small>`;
-    btn.onclick = () => selectTab(key);
-    tabsEl.appendChild(btn);
+  // Builds the tabs and every item card in the current language.
+  function renderMenu() {
+    tabsEl.innerHTML = "";
+    panelsEl.innerHTML = "";
+    Object.entries(menu).forEach(([key, cat]) => {
+      const active = key === state.currentTab;
+      const btn = document.createElement("button");
+      btn.className = "cat-btn" + (active ? " active" : "");
+      btn.dataset.tab = key;
+      btn.innerHTML = `${L(cat)}<small>${cat.en}</small>`;
+      btn.onclick = () => selectTab(key);
+      tabsEl.appendChild(btn);
 
-    const panel = document.createElement("div");
-    panel.className = "panel" + (i === 0 ? " active" : "");
-    panel.id = "panel-" + key;
+      const panel = document.createElement("div");
+      panel.className = "panel" + (active ? " active" : "");
+      panel.id = "panel-" + key;
 
-    const title = document.createElement("div");
-    title.className = "section-title";
-    title.innerHTML = `${cat.zh} · ${cat.en}`;
-    panel.appendChild(title);
+      const title = document.createElement("div");
+      title.className = "section-title";
+      title.innerHTML = `${L(cat)} · ${cat.en}`;
+      panel.appendChild(title);
 
-    cat.items.forEach(item => panel.appendChild(renderItem(item)));
-    panelsEl.appendChild(panel);
-  });
+      cat.items.forEach(item => panel.appendChild(renderItem(item)));
+      panelsEl.appendChild(panel);
+    });
+  }
 
   function renderItem(item) {
     const card = document.createElement("div");
     card.className = "item-card";
     card.dataset.itemId = item.id;
 
-    const secretBadge = item.secret ? '<span class="secret-badge">隐藏菜单</span>' : '';
+    const secretBadge = item.secret ? `<span class="secret-badge">${T("secret")}</span>` : '';
     const hasMods = item.mods !== "none";
 
     card.innerHTML = `
       <div class="item-head">
         <div style="flex:1;">
-          <div class="item-zh">${item.zh}${secretBadge}</div>
+          <div class="item-zh">${L(item)}${secretBadge}</div>
           <div class="item-en">${item.en}</div>
         </div>
         <div class="item-price">$${item.price.toFixed(2)}</div>
       </div>
-      ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
+      ${D(item) ? `<div class="item-desc">${D(item)}</div>` : ''}
       ${hasMods ? renderModToggle(item) : ''}
       <div class="item-actions">
         <div class="qty-control">
@@ -1291,7 +1497,7 @@
           <input class="qty-val" id="qty-${item.id}" type="text" value="1" readonly>
           <button class="qty-btn" onclick="changeQty('${item.id}', 1)">+</button>
         </div>
-        <button class="add-btn" onclick="addToCart('${item.id}')">+ 加入购物车</button>
+        <button class="add-btn" onclick="addToCart('${item.id}')">${T("addBtn")}</button>
       </div>
     `;
     return card;
@@ -1301,13 +1507,13 @@
     const opts = group.options.map(o =>
       `<label class="mod-chip choice-chip">
         <input type="radio" name="${item.id}-${group.id}" data-item="${item.id}" data-choice="${group.id}" value="${o.id}"${o.default ? " checked" : ""}${o.price != null ? ` onchange="updateCardPrice('${item.id}')"` : ""}>
-        <span>${o.zh}${o.en ? `<span class="mod-en">${o.en}</span>` : ""}${o.price != null ? `<span class="choice-price">$${o.price.toFixed(2)}</span>` : ""}</span>
+        <span>${L(o)}${o.en ? `<span class="mod-en">${o.en}</span>` : ""}${o.price != null ? `<span class="choice-price">$${o.price.toFixed(2)}</span>` : ""}</span>
       </label>`
     ).join("");
     // 4 options (drink sizes) go 2×2 so they stay readable on a phone
     const cols = group.options.length > 3 ? 2 : group.options.length;
     return `<div class="choice-group">
-      <div class="choice-label">${group.zh} · ${group.en}</div>
+      <div class="choice-label">${L(group)} · ${group.en}</div>
       <div class="choice-row" style="grid-template-columns: repeat(${cols}, 1fr);">${opts}</div>
     </div>`;
   }
@@ -1339,14 +1545,14 @@
     const opts = mods.options.map(m =>
       `<label class="mod-chip">
         <input type="checkbox" data-item="${item.id}" data-mod="${m.id}"${m.id === "animal" ? ` onchange="onAnimalToggle(this)"` : ""}>
-        <span>${m.zh}<span class="mod-en">${m.en}</span></span>
+        <span>${L(m)}<span class="mod-en">${m.en}</span></span>
       </label>`
     ).join("");
     if (!opts && !hidden) return visible;
     return `
       ${visible}
       <button class="mod-toggle" onclick="toggleMods(this)">
-        <span>⚙️ ${mods.zh}</span>
+        <span>⚙️ ${L(mods)}</span>
         <span class="arrow">▼</span>
       </button>
       <div class="mod-section">
@@ -1414,25 +1620,25 @@
       const checked = Array.from(modChecks).sort((a, b) =>
         (b.dataset.mod === "animal") - (a.dataset.mod === "animal"));
       const animalFirst = checked.length && checked[0].dataset.mod === "animal" ? [checked.shift()] : [];
-      animalFirst.forEach(cb => {
+      // Each line keeps both languages so switching language mid-order works.
+      const pushOption = cb => {
         const mod = modSet.options.find(o => o.id === cb.dataset.mod);
-        if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
-      });
+        if (mod) selectedMods.push({ zh: mod.zh, es: mod.es || mod.zh, en: mod.en });
+      };
+      animalFirst.forEach(pushOption);
       const pushChoice = group => {
         const picked = document.querySelector(`input[name="${itemId}-${group.id}"]:checked`);
         const opt = group.options.find(o => o.id === (picked ? picked.value : null))
                  || group.options.find(o => o.default);
         if (opt && opt.en) selectedMods.push({
           zh: (group.zhPrefix || "") + opt.zh,
+          es: (group.esPrefix || "") + (opt.es || opt.zh),
           en: (group.enPrefix || "") + opt.en
         });
       };
       const choices = modSet.choices || [];
       choices.filter(g => !g.printLast).forEach(pushChoice);
-      checked.forEach(cb => {
-        const mod = modSet.options.find(o => o.id === cb.dataset.mod);
-        if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
-      });
+      checked.forEach(pushOption);
       // e.g. the combo drink goes at the end of the line
       choices.filter(g => g.printLast).forEach(pushChoice);
     }
@@ -1441,6 +1647,7 @@
       uid: Date.now() + Math.random(),
       id: item.id,
       zh: item.zh,
+      es: item.es || item.zh,
       en: item.en,
       qty,
       price: currentPrice(item),
@@ -1466,13 +1673,13 @@
     }
 
     updateCartBar();
-    showToast(`✓ ${item.zh} 已加入`);
+    showToast(T("added", L(item)));
   }
 
   function updateCartBar() {
     const count = state.cart.reduce((s, i) => s + i.qty, 0);
     const total = state.cart.reduce((s, i) => s + i.qty * i.price, 0);
-    document.getElementById("cartCount").textContent = `购物车: ${count} 件`;
+    document.getElementById("cartCount").textContent = T("cartCount", count);
     document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
   }
 
@@ -1490,8 +1697,8 @@
     if (state.cart.length === 0) {
       body.innerHTML = `<div class="cart-empty">
         <div class="big">EMPTY</div>
-        <p>购物车是空的</p>
-        <p style="font-size:15px; margin-top:4px;">请先选择菜单</p>
+        <p>${T("emptyTitle")}</p>
+        <p style="font-size:15px; margin-top:4px;">${T("emptySub")}</p>
       </div>`;
       return;
     }
@@ -1503,24 +1710,24 @@
     let html = "";
     state.cart.forEach(ci => {
       const modsHtml = ci.mods.length
-        ? `<div class="cart-item-mods">${ci.mods.map(m => `• ${m.zh}`).join("<br>")}</div>`
+        ? `<div class="cart-item-mods">${ci.mods.map(m => `• ${L(m)}`).join("<br>")}</div>`
         : "";
       html += `<div class="cart-item">
-        <div class="cart-item-name">${ci.zh} × ${ci.qty}</div>
+        <div class="cart-item-name">${L(ci)} × ${ci.qty}</div>
         <div class="cart-item-en">${ci.en}</div>
         ${modsHtml}
         <div class="cart-item-ctrl">
           <div class="cart-item-price">$${(ci.qty * ci.price).toFixed(2)}</div>
-          <button class="remove-btn" onclick="removeItem('${ci.uid}')">删除</button>
+          <button class="remove-btn" onclick="removeItem('${ci.uid}')">${T("remove")}</button>
         </div>
       </div>`;
     });
 
     html += `<div class="cart-totals">
-      <div class="cart-total-row"><span>小计</span><span>$${subtotal.toFixed(2)}</span></div>
-      <div class="cart-total-row"><span>税 (${(TAX_RATE * 100).toFixed(2)}% 洛杉矶县)</span><span>$${tax.toFixed(2)}</span></div>
-      <div class="cart-total-row big"><span>总计</span><span>$${total.toFixed(2)}</span></div>
-      <div class="price-note">价格来自店内菜单 (${PRICES_UPDATED}),隐藏菜单的价格是估计的</div>
+      <div class="cart-total-row"><span>${T("subtotal")}</span><span>$${subtotal.toFixed(2)}</span></div>
+      <div class="cart-total-row"><span>${T("tax", (TAX_RATE * 100).toFixed(2))}</span><span>$${tax.toFixed(2)}</span></div>
+      <div class="cart-total-row big"><span>${T("total")}</span><span>$${total.toFixed(2)}</span></div>
+      <div class="price-note">${T("priceNote")}</div>
     </div>`;
 
     body.innerHTML = html;
@@ -1534,7 +1741,7 @@
 
   function clearCart() {
     if (state.cart.length === 0) return;
-    if (!confirm("确定要清空吗?")) return;
+    if (!confirm(T("confirmClear"))) return;
     state.cart = [];
     updateCartBar();
     renderCartBody();
@@ -1542,7 +1749,7 @@
 
   function showOrderSheet() {
     if (state.cart.length === 0) {
-      alert("购物车是空的");
+      alert(T("cartEmptyAlert"));
       return;
     }
     const body = document.getElementById("showBody");
@@ -1551,7 +1758,7 @@
         <div class="togo-icon">🥡</div>
         <div class="togo-text">
           <div class="togo-en">TO-GO, PLEASE</div>
-          <div class="togo-sub">Not eating in vehicle · 不在车上吃</div>
+          <div class="togo-sub">${T("togoSub")}</div>
         </div>
       </div>
     `;
@@ -1598,7 +1805,7 @@
     const saveBtn = document.querySelector(".show-mode-save");
     const originalText = saveBtn.textContent;
     saveBtn.disabled = true;
-    saveBtn.textContent = "⏳ 生成中...";
+    saveBtn.textContent = T("generating");
 
     try {
       // Build a dedicated off-screen capture element that contains
@@ -1621,7 +1828,7 @@
         </div>
         <div style="padding:8px 10px;">${src}</div>
         <div style="background:#1a1a1a;color:#fff;text-align:center;padding:8px;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;">
-          妈妈的 IN-N-OUT 点餐 · ${new Date().toLocaleDateString("zh-CN")}
+          ${T("imgFooter", new Date().toLocaleDateString(T("locale")))}
         </div>
       `;
       document.body.appendChild(capture);
@@ -1650,7 +1857,7 @@
       // Convert to blob
       canvas.toBlob((blob) => {
         if (!blob) {
-          alert("生成图片失败,请再试一次");
+          alert(T("imgFail"));
           saveBtn.disabled = false;
           saveBtn.textContent = originalText;
           return;
@@ -1663,11 +1870,11 @@
         const shareBtn = document.getElementById("photoShareBtn");
 
         if (navigator.share && navigator.canShare) {
-          msgEl.innerHTML = "<strong>订单图片已生成 ✓</strong>点下面按钮保存到相册或分享";
-          shareBtn.textContent = "📤 分享/存图";
+          msgEl.innerHTML = T("imgReadyShare");
+          shareBtn.textContent = T("shareBtn");
         } else {
-          msgEl.innerHTML = "<strong>订单图片已生成 ✓</strong>点下面按钮下载图片";
-          shareBtn.textContent = "💾 下载";
+          msgEl.innerHTML = T("imgReadyDownload");
+          shareBtn.textContent = T("downloadBtn");
         }
 
         document.getElementById("photoPreview").classList.add("active");
@@ -1676,7 +1883,7 @@
       }, "image/png", 0.95);
     } catch (err) {
       console.error("Photo generation error:", err);
-      alert("生成图片失败: " + err.message);
+      alert(T("imgFailErr") + err.message);
       saveBtn.disabled = false;
       saveBtn.textContent = originalText;
     }
@@ -1694,7 +1901,7 @@
       try {
         await navigator.share({
           files: [file],
-          title: "In-N-Out 订单"
+          title: T("shareTitle")
         });
         return;
       } catch (err) {
@@ -1713,7 +1920,7 @@
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    showToast("✓ 图片已下载");
+    showToast(T("downloaded"));
   }
 
   function closePhotoPreview() {
@@ -1739,6 +1946,8 @@
     if (e.target.id === "cartModal") closeCart();
   });
 
+  applyStaticText();
+  renderMenu();
   updateCartBar();
 
   // Register service worker for offline use (PWA)
