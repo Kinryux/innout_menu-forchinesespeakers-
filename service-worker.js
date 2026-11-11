@@ -1,7 +1,8 @@
 // Service Worker for In-N-Out Order Helper
 // Caches all app files so the app works offline after first visit
 
-const CACHE_NAME = 'innout-order-v10';
+// Bump on every release, together with APP_VERSION in index.html.
+const CACHE_NAME = 'innout-order-v11';
 const FILES_TO_CACHE = [
   './',
   './index.html',

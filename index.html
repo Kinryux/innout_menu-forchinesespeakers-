@@ -55,10 +55,24 @@
   }
 
   .header {
+    position: relative;
     background: var(--innout-red);
     color: #fff;
     padding: 18px 16px 14px;
     text-align: left;
+  }
+
+  .app-version {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(0, 0, 0, 0.18);
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 999px;
   }
 
   .header-brand {
@@ -1014,6 +1028,7 @@
 <header class="header">
   <div class="header-brand">In-N-Out</div>
   <h1>妈妈的点餐单</h1>
+  <span class="app-version" id="appVersion"></span>
 </header>
 
 <nav class="category-nav" id="tabs"></nav>
@@ -1094,6 +1109,12 @@
 <script src="html2canvas.min.js"></script>
 
 <script>
+  // App version shown in the header. Bump this together with CACHE_NAME in
+  // service-worker.js on every release, so phones pick up the update and
+  // you can see which version she has.
+  const APP_VERSION = "v11";
+  document.getElementById("appVersion").textContent = APP_VERSION;
+
   // Prices: from the 2026 drive-thru menu board photo. Secret-menu items aren't
   // on the board, so their prices are estimates (marked "est." below).
   const PRICES_UPDATED = "2026年11月";
