@@ -6,6 +6,12 @@ image. Works offline once it's on the Home Screen.
 
 Prices are estimates for Southern California (2026) and may vary by location.
 
+Not affiliated with or endorsed by In-N-Out Burgers. "In-N-Out" and menu item
+names are trademarks of their owner and are used only to describe what you're
+ordering.
+
+© 2026 David Lu · Insta@Kinryux
+
 ## Versions
 
 The version is shown in the app header (e.g. `V5.0.0`) and uses
