@@ -2,7 +2,7 @@
 // Caches all app files so the app works offline after first visit
 
 // Bump on every release, together with APP_VERSION in index.html.
-const CACHE_NAME = 'innout-order-v12';
+const CACHE_NAME = 'innout-order-v13';
 const FILES_TO_CACHE = [
   './',
   './index.html',

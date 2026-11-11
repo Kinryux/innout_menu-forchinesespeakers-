@@ -139,15 +139,16 @@
   html[lang="es"] .show-mode-close { font-size: 14px; }
   html[lang="es"] .toast { font-size: 16px; }
 
+  /* Same font as the app's English labels and the Home Screen icon */
   .header-brand {
-    font-family: 'Fraunces', 'Bebas Neue', serif;
-    font-style: italic;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    line-height: 1;
     color: var(--innout-yellow);
     letter-spacing: 3px;
-    margin-bottom: 2px;
     text-transform: uppercase;
-    opacity: 0.95;
   }
 
   .header h1 {
@@ -1185,7 +1186,7 @@
   // App version shown in the header. Bump this together with CACHE_NAME in
   // service-worker.js on every release, so phones pick up the update and
   // you can see which version she has.
-  const APP_VERSION = "v12";
+  const APP_VERSION = "v13";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
   // ============ LANGUAGE ============
