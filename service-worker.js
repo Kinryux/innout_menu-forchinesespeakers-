@@ -8,6 +8,7 @@ const FILES_TO_CACHE = [
   './index.html',
   './manifest.json',
   './html2canvas.min.js',
+  './icon-180.png',
   './icon-192.png',
   './icon-512.png',
   './icon-maskable-512.png',
