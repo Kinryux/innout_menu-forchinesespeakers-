@@ -14,11 +14,11 @@ ordering.
 
 ## Versions
 
-The version is shown in the app header (e.g. `V5.0.0`) and uses
-`MAJOR.MINOR.PATCH`:
+The version is shown in the app header (e.g. `V5.4`) and uses
+`MAJOR.MINOR`:
 
-- **Middle number** (`5.1.0`): bigger changes, such as new features or redesigns.
-- **Last number** (`5.0.1`): small fixes, wording, price updates, tweaks.
+- **First number** (`6.0`): bigger changes, such as new features or redesigns.
+- **Last number** (`5.5`): small fixes, wording, price updates, tweaks.
 
 On every release, change both:
 

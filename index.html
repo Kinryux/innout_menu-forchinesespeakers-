@@ -72,16 +72,23 @@
 
   .app-version {
     display: inline-block;
-    margin-left: 6px;
-    vertical-align: 1px;
+    margin-left: 7px;
     background: rgba(0, 0, 0, 0.18);
     color: rgba(255, 255, 255, 0.9);
     font-family: 'Bebas Neue', sans-serif;
     font-style: normal;
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    padding: 1px 8px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 2px 6px 1px;
     border-radius: 999px;
+  }
+
+  /* On the smallest phones (<360px) "Español" becomes "ES" so the version
+     still fits on the top line next to IN-N-OUT PAL */
+  .lang-short { display: none; }
+  @media (max-width: 359px) {
+    .lang-long { display: none; }
+    .lang-short { display: inline; }
   }
 
   /* 中文 / Español switch — selected = yellow, like everything else */
@@ -1162,13 +1169,13 @@
 
 <header class="header">
   <div class="header-top">
-    <div class="header-brand">In-N-Out <span class="brand-pal">Pal</span></div>
+    <div class="header-brand">In-N-Out <span class="brand-pal">Pal</span><span class="app-version" id="appVersion"></span></div>
     <div class="lang-switch" role="group" aria-label="Language">
       <button type="button" data-lang="zh" onclick="setLang('zh')">中文</button>
-      <button type="button" data-lang="es" onclick="setLang('es')">Español</button>
+      <button type="button" data-lang="es" onclick="setLang('es')" aria-label="Español"><span class="lang-long">Español</span><span class="lang-short">ES</span></button>
     </div>
   </div>
-  <div class="header-sub">Translated Menu Helper <span class="app-version" id="appVersion"></span></div>
+  <div class="header-sub">Translated Menu Helper</div>
   <h1 data-i18n="title">妈妈的点餐单</h1>
 </header>
 
@@ -1257,12 +1264,12 @@
 <script src="html2canvas.min.js"></script>
 
 <script>
-  // App version shown in the header: MAJOR.MINOR.PATCH
-  //   middle number (5.1.0) — bigger changes: new features, redesigns
-  //   last number  (5.0.1) — small fixes, wording, prices, tweaks
+  // App version shown in the header: MAJOR.MINOR
+  //   first number (6.0) — bigger changes: new features, redesigns
+  //   last number  (5.5) — small fixes, wording, prices, tweaks
   // Bump this together with CACHE_NAME in service-worker.js on every release,
   // so phones pick up the update and you can see which version she has.
-  const APP_VERSION = "v5.0.3";
+  const APP_VERSION = "v5.4";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
   // Small signature + trademark disclaimer at the bottom of every screen
