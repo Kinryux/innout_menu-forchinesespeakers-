@@ -753,6 +753,17 @@
     font-weight: 700;
   }
 
+  /* Under the instructions at the top of the menu */
+  .price-disclaimer {
+    font-size: 14px;
+    color: var(--muted);
+    text-align: center;
+    margin: -8px 6px 18px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  html[lang="es"] .price-disclaimer { font-size: 13px; }
+
   .price-note {
     font-size: 14px;
     color: var(--muted);
@@ -1149,6 +1160,8 @@
     </div>
   </div>
 
+  <div class="price-disclaimer" data-i18n="priceNote"></div>
+
   <div id="panels"></div>
 </main>
 
@@ -1205,10 +1218,12 @@
 <script src="html2canvas.min.js"></script>
 
 <script>
-  // App version shown in the header. Bump this together with CACHE_NAME in
-  // service-worker.js on every release, so phones pick up the update and
-  // you can see which version she has.
-  const APP_VERSION = "v15";
+  // App version shown in the header: MAJOR.MINOR.PATCH
+  //   middle number (5.1.0) — bigger changes: new features, redesigns
+  //   last number  (5.0.1) — small fixes, wording, prices, tweaks
+  // Bump this together with CACHE_NAME in service-worker.js on every release,
+  // so phones pick up the update and you can see which version she has.
+  const APP_VERSION = "v5.0.0";
   document.getElementById("appVersion").textContent = APP_VERSION;
 
   // ============ LANGUAGE ============
@@ -1243,7 +1258,7 @@
       subtotal: "小计",
       tax: pct => `税 (${pct}% 洛杉矶县)`,
       total: "总计",
-      priceNote: "价格来自店内菜单 (2026年11月),隐藏菜单的价格是估计的",
+      priceNote: "价格为2026年南加州的估计价格,各分店价格可能不同。",
       confirmClear: "确定要清空吗?",
       cartEmptyAlert: "购物车是空的",
       togoSub: "Not eating in vehicle · 不在车上吃",
@@ -1284,7 +1299,7 @@
       subtotal: "Subtotal",
       tax: pct => `Impuesto (${pct}% condado de LA)`,
       total: "Total",
-      priceNote: "Precios del menú de la tienda (nov. 2026). Los del menú secreto son estimados.",
+      priceNote: "Precios estimados para el sur de California (2026). Pueden variar según la sucursal.",
       confirmClear: "¿Vaciar el carrito?",
       cartEmptyAlert: "El carrito está vacío",
       togoSub: "Not eating in vehicle · No comeremos en el carro",
@@ -1343,8 +1358,9 @@
   // on the board, so their prices are estimates (the cart says so).
   // Drink sizes from the board (soft drinks, iced tea, lemonade)
   const DRINK_PRICES = { small: 2.30, medium: 2.45, large: 2.65, xlarge: 2.85 };
-  // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County)
-  const TAX_RATE = 0.0975;
+  // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County).
+  // 10.25% since Oct 1, 2026 (Measure ER added 0.5% countywide for 5 years; was 9.75%).
+  const TAX_RATE = 0.1025;
 
   const menu = {
     burgers: {
