@@ -764,6 +764,20 @@
   }
   html[lang="es"] .price-disclaimer { font-size: 13px; }
 
+  /* "© 2026 David Lu · @Kinryux": quiet, but readable up close */
+  .credit {
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    opacity: 0.6;
+    text-align: center;
+    margin: 20px 0 6px;
+  }
+  .credit-sheet { margin: 8px 0 2px; }
+  .credit-light { color: #fff; opacity: 0.45; margin-top: 16px; }
+
   .price-note {
     font-size: 14px;
     color: var(--muted);
@@ -1163,6 +1177,8 @@
   <div class="price-disclaimer" data-i18n="priceNote"></div>
 
   <div id="panels"></div>
+
+  <footer class="credit" data-credit></footer>
 </main>
 
 <div class="cart-bar">
@@ -1211,6 +1227,7 @@
     <button id="photoShareBtn" onclick="sharePhoto()">📤 分享/存图</button>
     <button class="btn-close-preview" onclick="closePhotoPreview()" data-i18n="close">关闭</button>
   </div>
+  <div class="credit credit-light" data-credit></div>
 </div>
 
 <div class="toast" id="toast">✓ 已加入</div>
@@ -1223,8 +1240,12 @@
   //   last number  (5.0.1) — small fixes, wording, prices, tweaks
   // Bump this together with CACHE_NAME in service-worker.js on every release,
   // so phones pick up the update and you can see which version she has.
-  const APP_VERSION = "v5.0.0";
+  const APP_VERSION = "v5.0.1";
   document.getElementById("appVersion").textContent = APP_VERSION;
+
+  // Small signature shown at the bottom of every screen (and in the saved image)
+  const CREDIT = "© 2026 David Lu · Insta@Kinryux";
+  document.querySelectorAll("[data-credit]").forEach(el => { el.textContent = CREDIT; });
 
   // ============ LANGUAGE ============
   // Chinese is the default. Spanish is an optional extra, remembered per phone.
@@ -1741,7 +1762,8 @@
         <div class="big">EMPTY</div>
         <p>${T("emptyTitle")}</p>
         <p style="font-size:15px; margin-top:4px;">${T("emptySub")}</p>
-      </div>`;
+      </div>
+      <div class="credit">${CREDIT}</div>`;
       return;
     }
 
@@ -1770,7 +1792,8 @@
       <div class="cart-total-row"><span>${T("tax", (TAX_RATE * 100).toFixed(2))}</span><span>$${tax.toFixed(2)}</span></div>
       <div class="cart-total-row big"><span>${T("total")}</span><span>$${total.toFixed(2)}</span></div>
       <div class="price-note">${T("priceNote")}</div>
-    </div>`;
+    </div>
+    <div class="credit">${CREDIT}</div>`;
 
     body.innerHTML = html;
   }
@@ -1821,6 +1844,7 @@
       <div class="thank-you">
         <div class="thank-you-en">Thank you for your patience and assistance!</div>
       </div>
+      <div class="credit credit-sheet">${CREDIT}</div>
     `;
 
     body.innerHTML = html;
