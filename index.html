@@ -316,6 +316,15 @@
     gap: 6px;
   }
 
+  .choice-price {
+    display: block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    margin-top: 2px;
+    font-weight: normal;
+  }
+
   .choice-chip {
     position: relative;
     justify-content: center;
@@ -1086,9 +1095,11 @@
 <script src="html2canvas.min.js"></script>
 
 <script>
-  // Prices: approximate 2026 California prices (In-N-Out doesn't publish them).
-  // Check the menu board at Gale & 7th (Hacienda Heights) and adjust here.
+  // Prices: from the 2026 drive-thru menu board photo. Secret-menu items aren't
+  // on the board, so their prices are estimates (marked "est." below).
   const PRICES_UPDATED = "2026年11月";
+  // Drink sizes from the board (soft drinks, iced tea, lemonade)
+  const DRINK_PRICES = { small: 2.30, medium: 2.45, large: 2.65, xlarge: 2.85 };
   // Sales tax for 14620 E Gale Ave, Hacienda Heights 91745 (unincorporated LA County)
   const TAX_RATE = 0.0975;
 
@@ -1096,50 +1107,53 @@
     burgers: {
       zh: "汉堡", en: "BURGERS",
       items: [
-        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 6.25, mods: "burger" },
-        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.35, mods: "burger" },
+        { id: "dbldbl", zh: "双层双层 (最受欢迎)", en: "Double-Double", desc: "两片肉饼 + 两片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 6.35, mods: "burger" },
+        { id: "cheese", zh: "芝士汉堡", en: "Cheeseburger", desc: "一片肉饼 + 一片芝士 + 生菜 + 番茄 + 洋葱 + 酱", price: 4.40, mods: "burger" },
         { id: "hamburger", zh: "汉堡包 (无芝士)", en: "Hamburger", desc: "一片肉饼 + 生菜 + 番茄 + 洋葱 + 酱", price: 3.85, mods: "burger" },
-        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 8.25, mods: "burger" },
-        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 10.25, mods: "burger" },
-        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 6.25, mods: "burger" },
+        { id: "3x3", zh: "三层三层", en: "3x3", desc: "三片肉饼 + 三片芝士", secret: true, price: 8.35, mods: "burger" },
+        { id: "4x4", zh: "四层四层", en: "4x4", desc: "四片肉饼 + 四片芝士", secret: true, price: 10.35, mods: "burger" },
+        { id: "protein", zh: "生菜包双层 (低碳)", en: "Protein Style Double-Double", desc: "用生菜代替面包", secret: true, price: 6.35, mods: "burger" },
         { id: "grilled", zh: "素食芝士堡 (无肉)", en: "Grilled Cheese", desc: "只有芝士和蔬菜,没有肉", secret: true, price: 3.85, mods: "burger" }
       ]
     },
     sides: {
       zh: "薯条 / 套餐", en: "FRIES / COMBO",
       items: [
-        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.65, mods: "fries" },
-        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.85, mods: "none" },
-        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.75, mods: "none" },
-        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 10.65, mods: "burger" },
-        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 8.80, mods: "burger" },
-        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 8.30, mods: "burger" }
+        { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.40, mods: "fries" },
+        { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.60, mods: "none" },
+        { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.50, mods: "none" },
+        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 11.20, mods: "burger" },
+        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 9.25, mods: "burger" },
+        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 8.70, mods: "burger" }
       ]
     },
     drinks: {
       zh: "饮料", en: "DRINKS",
       items: [
-        { id: "coke", zh: "可乐 (中杯)", en: "Medium Coca-Cola", price: 2.45, mods: "none" },
-        { id: "diet", zh: "健怡可乐", en: "Diet Coke", price: 2.45, mods: "none" },
-        { id: "sprite", zh: "雪碧", en: "Sprite", price: 2.45, mods: "none" },
-        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: 2.45, mods: "none" },
-        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: 2.45, mods: "none" },
-        { id: "lemonade", zh: "柠檬水", en: "Lemonade", price: 2.45, mods: "none" },
-        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: 2.45, mods: "none" },
-        { id: "milk", zh: "牛奶", en: "Milk", price: 1.30, mods: "none" },
-        { id: "coffee", zh: "咖啡", en: "Coffee", price: 1.80, mods: "none" },
-        { id: "cocoa", zh: "热可可", en: "Hot Cocoa", price: 2.30, mods: "none" },
+        { id: "coke", zh: "可乐", en: "Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "cherrycoke", zh: "樱桃可乐", en: "Cherry Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "diet", zh: "健怡可乐 (无糖)", en: "Diet Coke", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "7up", zh: "七喜 (像雪碧)", en: "7 Up", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "drpepper", zh: "胡椒博士", en: "Dr Pepper", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "rootbeer", zh: "沙士 (根汁汽水)", en: "Root Beer", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "icedtea", zh: "冰茶 (无糖)", en: "Iced Tea", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "lemonade", zh: "粉红柠檬水", en: "Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "litelemonade", zh: "低糖粉红柠檬水", en: "Lite Pink Lemonade", price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "arnold", zh: "茶加柠檬水", en: "Arnold Palmer — half tea half lemonade", secret: true, price: DRINK_PRICES.medium, mods: "drink" },
+        { id: "milk", zh: "牛奶", en: "Milk", price: 1.25, mods: "none" },
+        { id: "coffee", zh: "咖啡", en: "Coffee", price: 1.65, mods: "none" },
+        { id: "cocoa", zh: "热可可", en: "Hot Cocoa", price: 2.45, mods: "none" },
         { id: "water", zh: "水 (免费)", en: "Water Cup — free", price: 0, mods: "none" }
       ]
     },
     shakes: {
       zh: "奶昔", en: "SHAKES",
       items: [
-        { id: "van", zh: "香草奶昔", en: "Vanilla Shake", price: 3.25, mods: "none" },
-        { id: "choc", zh: "巧克力奶昔", en: "Chocolate Shake", price: 3.25, mods: "none" },
-        { id: "straw", zh: "草莓奶昔", en: "Strawberry Shake", price: 3.25, mods: "none" },
-        { id: "neo", zh: "三色奶昔 (三种口味)", en: "Neapolitan Shake — all three flavors", secret: true, price: 3.25, mods: "none" },
-        { id: "blackwhite", zh: "黑白奶昔", en: "Black & White Shake — chocolate and vanilla", secret: true, price: 3.25, mods: "none" }
+        { id: "van", zh: "香草奶昔", en: "Vanilla Shake", price: 3.20, mods: "none" },
+        { id: "choc", zh: "巧克力奶昔", en: "Chocolate Shake", price: 3.20, mods: "none" },
+        { id: "straw", zh: "草莓奶昔", en: "Strawberry Shake", price: 3.20, mods: "none" },
+        { id: "neo", zh: "三色奶昔 (三种口味)", en: "Neapolitan Shake — all three flavors", secret: true, price: 3.20, mods: "none" },
+        { id: "blackwhite", zh: "黑白奶昔", en: "Black & White Shake — chocolate and vanilla", secret: true, price: 3.20, mods: "none" }
       ]
     }
   };
@@ -1168,6 +1182,17 @@
         { id: "protein_mod", zh: "生菜包 (不要面包)", en: "Protein Style — lettuce wrap" },
         { id: "chopped_chilis", zh: "加辣椒", en: "Add Chopped Chilis" }
       ]
+    },
+    drink: {
+      choices: [
+        { id: "size", zh: "大小", en: "SIZE", visible: true, options: [
+          { id: "small", zh: "小杯", en: "Small", price: DRINK_PRICES.small },
+          { id: "medium", zh: "中杯", en: "Medium", price: DRINK_PRICES.medium, default: true },
+          { id: "large", zh: "大杯", en: "Large", price: DRINK_PRICES.large },
+          { id: "xlarge", zh: "特大杯", en: "X-Large", price: DRINK_PRICES.xlarge }
+        ]}
+      ],
+      options: []
     },
     fries: {
       zh: "想改一下吗? (可不选)",
@@ -1239,14 +1264,34 @@
   function renderChoiceGroup(item, group) {
     const opts = group.options.map(o =>
       `<label class="mod-chip choice-chip">
-        <input type="radio" name="${item.id}-${group.id}" data-item="${item.id}" data-choice="${group.id}" value="${o.id}"${o.default ? " checked" : ""}>
-        <span>${o.zh}${o.en ? `<span class="mod-en">${o.en}</span>` : ""}</span>
+        <input type="radio" name="${item.id}-${group.id}" data-item="${item.id}" data-choice="${group.id}" value="${o.id}"${o.default ? " checked" : ""}${o.price != null ? ` onchange="updateCardPrice('${item.id}')"` : ""}>
+        <span>${o.zh}${o.en ? `<span class="mod-en">${o.en}</span>` : ""}${o.price != null ? `<span class="choice-price">$${o.price.toFixed(2)}</span>` : ""}</span>
       </label>`
     ).join("");
+    // 4 options (drink sizes) go 2×2 so they stay readable on a phone
+    const cols = group.options.length > 3 ? 2 : group.options.length;
     return `<div class="choice-group">
       <div class="choice-label">${group.zh} · ${group.en}</div>
-      <div class="choice-row">${opts}</div>
+      <div class="choice-row" style="grid-template-columns: repeat(${cols}, 1fr);">${opts}</div>
     </div>`;
+  }
+
+  // Price of an item with its currently picked options (e.g. drink size)
+  function currentPrice(item) {
+    let price = item.price;
+    const modSet = modSets[item.mods];
+    (modSet && modSet.choices || []).forEach(group => {
+      const picked = document.querySelector(`input[name="${item.id}-${group.id}"]:checked`);
+      const opt = group.options.find(o => o.id === (picked ? picked.value : null));
+      if (opt && opt.price != null) price = opt.price;
+    });
+    return price;
+  }
+
+  function updateCardPrice(itemId) {
+    const item = findItem(itemId);
+    const el = document.querySelector(`[data-item-id="${itemId}"] .item-price`);
+    if (item && el) el.textContent = `$${currentPrice(item).toFixed(2)}`;
   }
 
   function renderModToggle(item) {
@@ -1261,6 +1306,7 @@
         <span>${m.zh}<span class="mod-en">${m.en}</span></span>
       </label>`
     ).join("");
+    if (!opts && !hidden) return visible;
     return `
       ${visible}
       <button class="mod-toggle" onclick="toggleMods(this)">
@@ -1347,7 +1393,7 @@
       zh: item.zh,
       en: item.en,
       qty,
-      price: item.price,
+      price: currentPrice(item),
       mods: selectedMods
     });
 
@@ -1359,6 +1405,7 @@
         const el = def && document.querySelector(`input[name="${itemId}-${group.id}"][value="${def.id}"]`);
         if (el) el.checked = true;
       });
+      updateCardPrice(itemId);
     }
     const card = document.querySelector(`[data-item-id="${itemId}"]`);
     if (card) {
@@ -1423,7 +1470,7 @@
       <div class="cart-total-row"><span>小计</span><span>$${subtotal.toFixed(2)}</span></div>
       <div class="cart-total-row"><span>税 (${(TAX_RATE * 100).toFixed(2)}% 洛杉矶县)</span><span>$${tax.toFixed(2)}</span></div>
       <div class="cart-total-row big"><span>总计</span><span>$${total.toFixed(2)}</span></div>
-      <div class="price-note">价格是估计的 (${PRICES_UPDATED}),以店里为准</div>
+      <div class="price-note">价格来自店内菜单 (${PRICES_UPDATED}),隐藏菜单的价格是估计的</div>
     </div>`;
 
     body.innerHTML = html;
