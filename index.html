@@ -1122,9 +1122,9 @@
         { id: "fries", zh: "薯条", en: "French Fries", desc: "现切新鲜土豆", price: 2.40, mods: "fries" },
         { id: "animalfries", zh: "野兽薯条", en: "Animal Style Fries", desc: "薯条 + 芝士 + 炒洋葱 + 酱", secret: true, price: 4.60, mods: "none" },
         { id: "cheesefries", zh: "芝士薯条", en: "Cheese Fries", desc: "薯条加芝士", secret: true, price: 3.50, mods: "none" },
-        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 饮料", price: 11.20, mods: "burger" },
-        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 饮料", price: 9.25, mods: "burger" },
-        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 饮料", price: 8.70, mods: "burger" }
+        { id: "combo1", zh: "1号套餐 (双层双层)", en: "Combo #1 — Double-Double", desc: "双层双层 + 薯条 + 中杯饮料", price: 11.20, mods: "combo" },
+        { id: "combo2", zh: "2号套餐 (芝士汉堡)", en: "Combo #2 — Cheeseburger", desc: "芝士汉堡 + 薯条 + 中杯饮料", price: 9.25, mods: "combo" },
+        { id: "combo3", zh: "3号套餐 (汉堡包)", en: "Combo #3 — Hamburger", desc: "汉堡包 + 薯条 + 中杯饮料", price: 8.70, mods: "combo" }
       ]
     },
     drinks: {
@@ -1205,7 +1205,23 @@
     }
   };
 
-  const state = { currentTab: "burgers", cart: [] };
+  // Combos = burger choices + which medium drink. The drink list comes from the
+  // regular (non-secret) drinks menu, so it stays in sync with it.
+  modSets.combo = {
+    zh: modSets.burger.zh,
+    choices: [
+      ...modSets.burger.choices,
+      { id: "drink", zh: "饮料 (中杯)", en: "DRINK (MEDIUM)", visible: true, printLast: true,
+        zhPrefix: "饮料: ", enPrefix: "Drink: Medium ",
+        options: menu.drinks.items
+          .filter(d => d.mods === "drink" && !d.secret)
+          .map((d, i) => ({ id: d.id, zh: d.zh, en: d.en, default: i === 0 }))
+      }
+    ],
+    options: modSets.burger.options
+  };
+
+  const state ={ currentTab: "burgers", cart: [] };
 
   const tabsEl = document.getElementById("tabs");
   const panelsEl = document.getElementById("panels");
@@ -1375,16 +1391,23 @@
         const mod = modSet.options.find(o => o.id === cb.dataset.mod);
         if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
       });
-      (modSet.choices || []).forEach(group => {
+      const pushChoice = group => {
         const picked = document.querySelector(`input[name="${itemId}-${group.id}"]:checked`);
         const opt = group.options.find(o => o.id === (picked ? picked.value : null))
                  || group.options.find(o => o.default);
-        if (opt && opt.en) selectedMods.push({ zh: opt.zh, en: opt.en });
-      });
+        if (opt && opt.en) selectedMods.push({
+          zh: (group.zhPrefix || "") + opt.zh,
+          en: (group.enPrefix || "") + opt.en
+        });
+      };
+      const choices = modSet.choices || [];
+      choices.filter(g => !g.printLast).forEach(pushChoice);
       checked.forEach(cb => {
         const mod = modSet.options.find(o => o.id === cb.dataset.mod);
         if (mod) selectedMods.push({ zh: mod.zh, en: mod.en });
       });
+      // e.g. the combo drink goes at the end of the line
+      choices.filter(g => g.printLast).forEach(pushChoice);
     }
 
     state.cart.push({
