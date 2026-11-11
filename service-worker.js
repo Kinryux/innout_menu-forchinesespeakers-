@@ -2,7 +2,7 @@
 // Caches all app files so the app works offline after first visit
 
 // Bump on every release, together with APP_VERSION in index.html.
-const CACHE_NAME = 'innout-order-v14';
+const CACHE_NAME = 'innout-order-v15';
 const FILES_TO_CACHE = [
   './',
   './index.html',
@@ -13,7 +13,7 @@ const FILES_TO_CACHE = [
   './icon-512.png',
   './icon-maskable-512.png',
   // Google Fonts CSS
-  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,wght@1,500;1,600&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap'
 ];
 
 // Install: cache all app shell files
