@@ -17,7 +17,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Fraunces:ital,wght@1,500;1,600&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+SC:wght@600;700;900&family=Noto+Sans+SC:wght@500;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --innout-red: #ed1c24;
@@ -929,27 +929,13 @@
     text-align: center;
   }
 
-  .thank-you-hearts {
-    font-size: 14px;
-    letter-spacing: 5px;
-    margin-bottom: 2px;
-  }
-
+  /* Same font as the rest of the app */
   .thank-you-en {
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 12px;
+    font-family: 'Noto Sans SC', system-ui, sans-serif;
+    font-size: 14px;
     color: var(--ink);
-    font-weight: 600;
-    line-height: 1.2;
-  }
-
-  .thank-you-zh {
-    display: none;
-  }
-
-  .thank-you-sub {
-    display: none;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
   .show-total {
@@ -1817,10 +1803,7 @@
 
     html += `
       <div class="thank-you">
-        <div class="thank-you-hearts">🌟 💛 🌟</div>
-        <div class="thank-you-en">Thank you so much for your patience and kindness!</div>
-        <div class="thank-you-zh">非常感谢您的耐心和帮助!</div>
-        <div class="thank-you-sub">Have a wonderful day 祝您愉快</div>
+        <div class="thank-you-en">Thank you for your patience and assistance!</div>
       </div>
     `;
 
